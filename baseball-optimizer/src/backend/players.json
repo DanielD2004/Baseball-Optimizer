@@ -1,0 +1,134 @@
+{
+    "players": [
+        {
+            "id": 1,
+            "name": "John Smith",
+            "skillRatings": {
+                "1B": 8,
+                "LF": 7,
+                "RF": 6
+            },
+            "preferences": ["1B", "LF"]
+        },
+        {
+            "id": 2,
+            "name": "Emily Johnson",
+            "skillRatings": {
+                "P": 9,
+                "3B": 7,
+                "SS": 6
+            },
+            "preferences": ["P", "3B"]
+        },
+        {
+            "id": 3,
+            "name": "Michael Davis",
+            "skillRatings": {
+                "C": 8,
+                "3B": 6,
+                "RF": 5
+            },
+            "preferences": ["C"]
+        },
+        {
+            "id": 4,
+            "name": "Sarah Wilson",
+            "skillRatings": {
+                "2B": 7,
+                "SS": 8,
+                "LF": 6
+            },
+            "preferences": ["SS", "2B"]
+        },
+        {
+            "id": 5,
+            "name": "David Martinez",
+            "skillRatings": {
+                "P": 7,
+                "RF": 8,
+                "LC": 6
+            },
+            "preferences": ["RF", "P"]
+        },
+        {
+            "id": 6,
+            "name": "Sophia Brown",
+            "skillRatings": {
+                "C": 6,
+                "1B": 9,
+                "3B": 7
+            },
+            "preferences": ["1B", "3B"]
+        },
+        {
+            "id": 7,
+            "name": "James Taylor",
+            "skillRatings": {
+                "LF": 8,
+                "RC": 7,
+                "SS": 5
+            },
+            "preferences": ["LF", "RC"]
+        },
+        {
+            "id": 8,
+            "name": "Olivia Anderson",
+            "skillRatings": {
+                "2B": 9,
+                "SS": 7,
+                "LC": 6
+            },
+            "preferences": ["2B", "SS"]
+        },
+        {
+            "id": 9,
+            "name": "William Thomas",
+            "skillRatings": {
+                "RF": 7,
+                "RC": 8,
+                "P": 5
+            },
+            "preferences": ["RC", "RF"]
+        },
+        {
+            "id": 10,
+            "name": "Ava White",
+            "skillRatings": {
+                "3B": 8,
+                "LF": 6,
+                "SS": 7
+            },
+            "preferences": ["3B", "SS"]
+        },
+        {
+            "id": 11,
+            "name": "Daniel Harris",
+            "skillRatings": {
+                "P": 8,
+                "C": 7,
+                "1B": 6
+            },
+            "preferences": ["P", "C"]
+        },
+        {
+            "id": 12,
+            "name": "Mia Robinson",
+            "skillRatings": {
+                "RC": 9,
+                "LF": 7,
+                "SS": 5
+            },
+            "preferences": ["RC", "LF"]
+        },
+        {
+            "id": 13,
+            "name": "Ethan Clark",
+            "skillRatings": {
+                "2B": 8,
+                "RF": 7,
+                "LC": 6
+            },
+            "preferences": ["2B", "RF"]
+        }
+    ]
+}

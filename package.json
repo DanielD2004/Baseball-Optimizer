@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "@clerk/backend": "^1.25.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "mongodb": "^6.15.0",
+    "nodemon": "^3.1.9",
+    "react-router-dom": "^7.4.0",
+    "shadcn": "^2.4.0-canary.17"
+  }
+}
