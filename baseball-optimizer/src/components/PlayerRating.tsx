@@ -7,9 +7,18 @@ function getLabelText(value: number) {
   return `${value} Star${value !== 1 ? 's' : ''}, ${value}`;
 }
 
-export default function PlayerRating() {
+interface PlayerRatingProps {
+  onRatingChange: (rating: number) => void;
+}
+
+export default function PlayerRating({ onRatingChange }) {
   const [value, setValue] = React.useState<number | null>(2.5);
   const [hover, setHover] = React.useState(-1);
+
+  const handleRatingChange = (event: React.ChangeEvent<{}>, newValue: number | null) => {
+    setValue(newValue);
+    onRatingChange(newValue);
+  };
 
   return (
     <Box sx={{ width: 200, display: 'flex', alignItems: 'center' }}>
@@ -18,9 +27,7 @@ export default function PlayerRating() {
         value={value}
         precision={0.5}
         getLabelText={getLabelText}
-        onChange={(event, newValue) => {
-          setValue(newValue);
-        }}
+        onChange={handleRatingChange}
         onChangeActive={(event, newHover) => {
           setHover(newHover);
         }}

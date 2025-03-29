@@ -12,10 +12,16 @@ interface Team {
     division: string;
 }
 
+type PositionOption = {
+	value: string;
+	label: string;
+  }
+
 interface Player {
-    name: string;
+    player_name: string;
     team_id: string;
     skill: number;
+    positions: {[key: string]: PositionOption};
 }
 
 function TeamPage() {
@@ -36,7 +42,7 @@ function TeamPage() {
         });
         const data = await response.json();
         if (data){
-            setPlayers(data)
+            setPlayers(data);
         }
         } catch (err) {
             console.error(err);
@@ -63,14 +69,24 @@ function TeamPage() {
                         <h1>{team.division}</h1>
                         <h1>{team.season}</h1>
                     </div>
-                    {players.length > 0 && ( <div>
+                    {players.length > 0 && ( 
+                    <div>
                         <h2>Players:</h2>
-                        {players.map((player: Player) => {
-                            return(<h1 key={player.name}>{player.name}</h1>)
-                        })}
+                        {players.map((player: Player) => (
+                            <div key={player.player_name}> {/* Key should be on the outermost div */}
+                                <h1>{player.player_name}</h1>
+                                <div>{player.skill}</div>
+                                {player.positions && Object.entries(player.positions).map(([position, data]) => (
+                                    <div key={position}>
+                                        <strong>{position}:</strong> {data.label}
+                                    </div>
+                                ))}
+                            </div>
+                        ))}
                     </div>
                     )}
-                    <AddPlayer/>
+                    <br/>
+                    <AddPlayer updatePlayers={fetchPlayers}/>
                 </>
             ) : (
                 <h2>No data</h2>

@@ -46,17 +46,15 @@ app.get("/", (req, res) => {
   res.send("yo");
 });
 
+// get all teams for a user
 app.get("/api/teams", async (req, res) => {
   const { userId } = req.query;
-
   if (!userId) {
     return res.status(400).json({ error: "User ID is required" });
   }
-
   try {
     const teamsCollection = db.collection("Teams");
     const teams = await teamsCollection.find({ user_id: userId }).toArray();
-
     res.status(200).json(teams);
   } catch (error) {
     console.error("Error fetching teams:", error);
@@ -64,9 +62,9 @@ app.get("/api/teams", async (req, res) => {
   }
 });
 
+// add a user
 app.post("/api/users", async (req, res) => {
   const { user_id, full_name, email } = req.body;
-
   try {
     const usersCollection = db.collection("Users");
     const result = await usersCollection.updateOne(
@@ -81,6 +79,7 @@ app.post("/api/users", async (req, res) => {
   }
 });
 
+// add a team
 app.post("/api/teams", async (req, res) => {
   const { user_id, team_name, season, division } = req.body;
   try {
@@ -99,6 +98,27 @@ app.post("/api/teams", async (req, res) => {
   }
 });
 
+// add a player to a team
+app.post("/api/teams/:team_id/players", async (req, res) => {
+  const { player_name, skill, positions } = req.body;
+  // return res.status(200).json(players);
+  const { team_id } = req.params;
+  try {
+    const playersCollection = db.collection("Players");
+    const result = await playersCollection.updateOne(
+      { player_name, skill, positions },
+      { 
+        $set: { player_name, skill, positions, team_id } ,
+      },
+      { upsert: true }
+    )
+    return res.status(200).json(playersCollection);
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+});
+
+// get all players for a team
 app.get("/teams/:team_id/players", async(req, res) => {
   const { team_id } = req.params;
   try {
