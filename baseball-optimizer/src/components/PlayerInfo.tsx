@@ -8,6 +8,7 @@ import { TextField } from '@mui/material';
 import { useLocation } from 'react-router-dom'
 
 type PositionOption = {
+	value: string;
 	label: string;
   }
 
@@ -24,39 +25,22 @@ interface Player {
     team_id: string;
     skill: number;
     positions: {[key: string]: PositionOption};
-	player_id: string;
 }
 
-interface AddPlayerProps {
-	updatePlayers: () => void;
-	player: Player | null;
-}
-
-const AddPlayer = ({updatePlayers, player}: AddPlayerProps) => {
-	const [name, setName] = useState<string>(player ? player.player_name : "");
+const AddPlayer = (data: Player) => {
+	const [name, setName] = useState<string>("");
 	const [rating, setRating] = useState<number>(2.5);
 	const positions: string[] = ["1B", "2B", "3B", "SS", "P", "C", "LF", "LC", "RC", "RF"];
 	const location = useLocation()
     const team: Team = location.state;
 
     const positionOptions: PositionOption[] = [
-		// maybe fix this one day
-		{ label: "Wants To Play" },
-		{ label: "Can Play" },
-		{ label: "Cannot Play" }
+		{ value: "wantsToPlay", label: "Wants To Play" },
+		{ value: "canPlay", label: "Can Play" },
+		{ value: "cannotPlay", label: "Cannot Play" }
 	  ]
 	  
-	const [selectedPositions, setSelectedPositions] = useState<{ [key: string]: PositionOption }>({
-		"1B": positionOptions[2],
-		"2B": positionOptions[2],
-		"3B": positionOptions[2],
-		"SS": positionOptions[2],
-		"P": positionOptions[2],
-		"C": positionOptions[2],
-		"LF": positionOptions[2],
-		"LC": positionOptions[2],
-		"RC": positionOptions[2],	
-	});
+	const [selectedPositions, setSelectedPositions] = useState<{ [key: string]: PositionOption }>({});
 
 	const handleChange = (selectedOption: PositionOption, position: string) => {
 		setSelectedPositions(prev => ({
@@ -68,25 +52,6 @@ const AddPlayer = ({updatePlayers, player}: AddPlayerProps) => {
 	const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setName(e.target.value);
 	};
-
-	const updatePlayer = async() => {
-		if (!player) return;
-		const response = await fetch(`http://localhost:5000/api/teams/${team.team_id}/players/update`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				player_id: player.player_id,
-				player_name: name,
-				skill: rating,
-				positions: selectedPositions
-			})
-		});
-		const res = await response.json();
-		// send emit to parent to update players
-		updatePlayers();
-	}
 
 	const AddPlayer = async() => {
     		const response = await fetch(`http://localhost:5000/api/teams/${team.team_id}/players`, {
@@ -106,13 +71,12 @@ const AddPlayer = ({updatePlayers, player}: AddPlayerProps) => {
     	}
 
 	const checkSubmit = (e) => {
-		if (name.trim() == "") {
+		if (name.trim() == "" || Object.keys(selectedPositions).length < positions.length) {
 			alert("Please Fill Out All Fields");
 			e.preventDefault()
 		}
 		else{
-			if(player) {updatePlayer(); return}
-			else{AddPlayer();}
+			AddPlayer();
 		}
 	}
 	
@@ -120,71 +84,43 @@ const AddPlayer = ({updatePlayers, player}: AddPlayerProps) => {
 		setRating(rating);
 	}
 
-	const test = (phrase: string) => {
-		if (phrase.includes("Can Play")) {
-			return 1
-		}
-		if (phrase.includes("Wants To Play")) {
-			return 0
-		}
-		return 2
-	}
-
 	useEffect(() => {
-		
-	}, []);
+	}, [selectedPositions, name, rating]);
 
 	// entire add player dialog
     return (
 		<Dialog.Root>
 		<Dialog.Trigger asChild>
-			<button className="Button violet">{player ? player.player_name : "Add Player"}</button> 
+			<button className="Button violet">Add Player</button>
 		</Dialog.Trigger>
 		<Dialog.Portal>
 			<Dialog.Overlay className="DialogOverlay" />
 			<Dialog.Content className="DialogContent">
-				<Dialog.Title className="DialogTitle">{player ? "Update Player" : "Add Player"}</Dialog.Title>
+				<Dialog.Title className="DialogTitle">Add Player</Dialog.Title>
 				<Dialog.Description className="DialogDescription">
-					{player ? "": "Add a player to your team, include their name, skill rating and position preferences"}
+					Add a player to your team, include their name, skill rating and position preferences
 				</Dialog.Description>
 				<fieldset className="Fieldset">
 					<label className="Label" htmlFor="name">
 						Name
 					</label>
-					<TextField style={{marginLeft: "10px"}} size="small" onChange={handleNameChange} value={name} label={player ? player.player_name : "Add Player"} variant="outlined"/>
+					<TextField style={{marginLeft: "10px"}} size="small" onChange={handleNameChange} value={name} label="Player Name" variant="outlined"/>
 				</fieldset>
 				<fieldset className="Fieldset">
 					<label className="Label" htmlFor="rating">
 						Rating
 					</label>
-					<PlayerRating initialValue={player ? player.skill : 2.5} onRatingChange={handleRatingChange}/> 
+					<PlayerRating onRatingChange={handleRatingChange}/>
 				</fieldset>
 				<div>
 				<div style={{display: "flex", flexDirection: "column", alignItems: "center", gap: "20px"}}>
-					{/* if theres a player, show their preferences, else show initial options */}
-					{player ? Object.entries(player.positions).map(([key, {label} ]) => ( 
-					<div key={key} style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "20px" }}>
-						<h2>{key}</h2>
-						<Select
-							options={positionOptions}
-							id={key}
-							defaultValue={{ label }}
-							styles={{
-								control: (baseStyles, state) => ({
-									...baseStyles,
-									width: 300,
-									borderRadius: state.isFocused ? "50px" : "0px",
-								}),
-							}}
-							onChange={(selectedOption: PositionOption) => handleChange(selectedOption, key)}
-						/>	
-					</div>
-					)) : positions.map((position) => (
-					<div key={position} style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "20px" }}>
-						<h2>{position}</h2>
-						<Select
+					{positions.map((position) => (
+						<div key={position} style={{display: "flex", flexDirection: "row", alignItems: "center", gap: "20px"}}>
+							<h2>{position}</h2>
+							<Select
 							options={positionOptions}
 							id={position}
+							defaultValue={positionOptions[2]}
 							styles={{
 								control: (baseStyles, state) => ({
 									...baseStyles,
@@ -193,15 +129,15 @@ const AddPlayer = ({updatePlayers, player}: AddPlayerProps) => {
 								}),
 							}}
 							onChange={(selectedOption: PositionOption) => handleChange(selectedOption, position)}
-						/>	
-					</div>
+							/>	
+						</div>
 					))}
 				</div>
 				<div
 					style={{ display: "flex", marginTop: 25, justifyContent: "flex-end" }}
 				>
 					<Dialog.Close asChild>
-						<button onClick={checkSubmit} className="Button green">{player ? "Update Player" : "Add Player"}</button>
+						<button onClick={checkSubmit} className="Button green">Add Player</button>
 					</Dialog.Close>
 				</div>
 				</div>

@@ -59,12 +59,13 @@ const Teams = () => {
   }
 
   useEffect(() => {
+    console.log(teams)
     if (user) {
       fetchTeams(user.id);
     } else {
       console.log("User error")
     }
-  }, [user, division]);
+  }, [user, division, teams]);
 
   return (
     <div>

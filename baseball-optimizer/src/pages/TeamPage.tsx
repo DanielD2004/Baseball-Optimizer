@@ -3,6 +3,7 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom'
 import { useUser } from '@clerk/clerk-react'
 import './TeamPage.css'
 import AddPlayer from '../components/AddPlayer'
+import PlayerInfo from '../components/PlayerInfo'
 
 interface Team {
     team_id: string;
@@ -22,6 +23,7 @@ interface Player {
     team_id: string;
     skill: number;
     positions: {[key: string]: PositionOption};
+    player_id: string;
 }
 
 function TeamPage() {
@@ -58,7 +60,7 @@ function TeamPage() {
             navigate('/');
         }
         fetchPlayers();
-    }, [user, team, navigate]);
+    }, [user, team]);
 
     return (
         <div>
@@ -70,23 +72,32 @@ function TeamPage() {
                         <h1>{team.season}</h1>
                     </div>
                     {players.length > 0 && ( 
-                    <div>
-                        <h2>Players:</h2>
+                    <>
+                    <h2>Players:</h2>
+                    <div style={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            justifyContent: "center",
+                            gap: "20px",
+                            maxWidth: "800px",
+                            margin: "0 auto"
+                        }}>
                         {players.map((player: Player) => (
-                            <div key={player.player_name}> {/* Key should be on the outermost div */}
-                                <h1>{player.player_name}</h1>
-                                <div>{player.skill}</div>
+                            <div style={{ minWidth: "150px", textAlign: "center", borderRight: "1px solid black", borderLeft: "1px solid black" }} key={player.player_name} > 
+                                <AddPlayer updatePlayers={fetchPlayers} player={player}/>
                                 {player.positions && Object.entries(player.positions).map(([position, data]) => (
                                     <div key={position}>
                                         <strong>{position}:</strong> {data.label}
-                                    </div>
+                                    </div> 
                                 ))}
+                                <br/><br/>
                             </div>
                         ))}
                     </div>
+                    </>
                     )}
                     <br/>
-                    <AddPlayer updatePlayers={fetchPlayers}/>
+                    <AddPlayer updatePlayers={fetchPlayers} player={null}/>
                 </>
             ) : (
                 <h2>No data</h2>

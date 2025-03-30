@@ -101,14 +101,37 @@ app.post("/api/teams", async (req, res) => {
 // add a player to a team
 app.post("/api/teams/:team_id/players", async (req, res) => {
   const { player_name, skill, positions } = req.body;
+  const { team_id } = req.params;
+  try {
+    const playersCollection = db.collection("Players");
+    const result = await playersCollection.insertOne(
+      { player_name, skill, positions },
+      { 
+        $set: { player_name, skill, positions, team_id } ,
+        $setOnInsert: {player_id: new ObjectId()},
+      },
+      { upsert: true }
+    )
+    return res.status(200).json(playersCollection);
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+});
+
+// update a player for a team
+app.post("/api/teams/:team_id/players/update", async (req, res) => {
+  const { player_name, skill, positions } = req.body;
   // return res.status(200).json(players);
   const { team_id } = req.params;
   try {
     const playersCollection = db.collection("Players");
     const result = await playersCollection.updateOne(
-      { player_name, skill, positions },
+      // check if player with same teamID and playerID exists
+      { player_id, team_id },
       { 
+        // update palyer if it exists, else insert with  player_id
         $set: { player_name, skill, positions, team_id } ,
+        $setOnInsert: {player_id: new ObjectId()},
       },
       { upsert: true }
     )
