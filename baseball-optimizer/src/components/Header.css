@@ -1,13 +1,11 @@
-#user-button {
-    margin-right:40px;
-}
-
 #header {
     width:100vw;
     height:50px;
     display:flex;
     flex-direction: row;
     justify-content: space-between;
+    margin-bottom:30px;
+    margin-left: 1%;
 }
 
 #backButton {

@@ -3,7 +3,6 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom'
 import { useUser } from '@clerk/clerk-react'
 import './TeamPage.css'
 import AddPlayer from '../components/AddPlayer'
-import PlayerInfo from '../components/PlayerInfo'
 
 interface Team {
     team_id: string;
@@ -14,7 +13,6 @@ interface Team {
 }
 
 type PositionOption = {
-	value: string;
 	label: string;
   }
 
@@ -23,16 +21,44 @@ interface Player {
     team_id: string;
     skill: number;
     positions: {[key: string]: PositionOption};
-    player_id: string;
+    player_id?: string;
+    default: boolean;
 }
 
+
+
 function TeamPage() {
-    // const { teamName, season, division } = useParams<{teamName: string; season: string; division: string}>();
     const [players,setPlayers] = useState([])
     const { user } = useUser() 
     const navigate = useNavigate()
     const location = useLocation()
     const team: Team = location.state;
+
+    const positionOptions: PositionOption[] = [
+		// maybe fix this one day
+		{ label: "Wants To Play" },
+		{ label: "Can Play" },
+		{ label: "Cannot Play" }
+	]
+
+    const defaultPlayer: Player = {
+            player_name: "",
+            team_id: team.team_id,
+            skill: 2.5,
+            positions: {
+            "1B": positionOptions[2],
+            "2B": positionOptions[2],
+            "3B": positionOptions[2],
+            "SS": positionOptions[2],
+            "P": positionOptions[2],
+            "C": positionOptions[2],
+            "LF": positionOptions[2],
+            "LC": positionOptions[2],
+            "RC": positionOptions[2],	
+            "RF": positionOptions[2],
+            },
+            default: true
+    }
 
     const fetchPlayers = async () =>{
         try {
@@ -67,8 +93,8 @@ function TeamPage() {
             {team ? (
                 <>
                     <div className="team-bio">
-                        <h1>{team.team_name}</h1>
                         <h1>{team.division}</h1>
+                        <h1>{team.team_name}</h1>
                         <h1>{team.season}</h1>
                     </div>
                     {players.length > 0 && ( 
@@ -97,7 +123,7 @@ function TeamPage() {
                     </>
                     )}
                     <br/>
-                    <AddPlayer updatePlayers={fetchPlayers} player={null}/>
+                    <AddPlayer updatePlayers={fetchPlayers} player={defaultPlayer}/>
                 </>
             ) : (
                 <h2>No data</h2>

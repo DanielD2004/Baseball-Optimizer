@@ -68,8 +68,8 @@ const Teams = () => {
   }, [user, division, teams]);
 
   return (
-    <div>
-      <h1>My Teams</h1>
+    <div id="teams">
+      <h1 id="my-teams-header" style={{}}>My Teams</h1>
       <hr/>
       {teams.length > 0 ? (
         <div>
@@ -92,7 +92,7 @@ const Teams = () => {
         <p>No teams found for this user.</p>
       )}
 
-       <div style={{position: "absolute", display: "flex", width: "100vw", marginTop: "20px", alignItems: "center"}}>
+       <div style={{ display: "flex", width: "100vw", marginTop: "20px", alignItems: "center", justifyContent: "center"}}>
         <InputLabel>Add Team:</InputLabel>
         <TextField style={{marginLeft: "10px"}} size="small" onChange={handleNameChange} value={teamName} label="Team Name" variant="outlined"/>
         <DatePicker setYear={setYear}/>

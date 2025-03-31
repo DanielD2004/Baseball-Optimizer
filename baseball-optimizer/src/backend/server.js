@@ -40,7 +40,7 @@ async function connectToDatabase() {
 }
 };
 
-connectToDatabase();
+
 
 app.get("/", (req, res) => {
   res.send("yo");
@@ -72,9 +72,9 @@ app.post("/api/users", async (req, res) => {
       { $set: { user_id,full_name, email } },
       { upsert: true }
     )
-    return res.status(200).json(usersCollection);
+    return res.status(200).json(result);
   } catch (error) {
-    console.error("Error fetching teams:", error);
+    console.error("Error inserting user:", error);
     res.status(500).json({ error });
   }
 });
@@ -92,7 +92,7 @@ app.post("/api/teams", async (req, res) => {
       },
       { upsert: true }
     )
-    return res.status(200).json(teamsCollection);
+    return res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ error });
   }
@@ -104,15 +104,15 @@ app.post("/api/teams/:team_id/players", async (req, res) => {
   const { team_id } = req.params;
   try {
     const playersCollection = db.collection("Players");
-    const result = await playersCollection.insertOne(
-      { player_name, skill, positions },
+    const result = await playersCollection.updateOne(
+      { player_name, skill, positions, team_id },
       { 
         $set: { player_name, skill, positions, team_id } ,
         $setOnInsert: {player_id: new ObjectId()},
       },
       { upsert: true }
     )
-    return res.status(200).json(playersCollection);
+    return res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ error });
   }
@@ -135,7 +135,7 @@ app.post("/api/teams/:team_id/players/update", async (req, res) => {
       },
       { upsert: true }
     )
-    return res.status(200).json(playersCollection);
+    return res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ error });
   }
@@ -146,13 +146,15 @@ app.get("/teams/:team_id/players", async(req, res) => {
   const { team_id } = req.params;
   try {
     const playersCollection = db.collection("Players");
-    const players = await playersCollection.find({ team_id }).toArray();
-    res.status(200).json(players);
+    const result = await playersCollection.find({ team_id }).toArray();
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ error });
   }
 })
 
-app.listen(PORT, () =>
-  console.log(`Server running on http://localhost:${PORT}`)
-);
+connectToDatabase().then(() => {
+  app.listen(PORT, () =>{
+    console.log(`Server running on http://localhost:${PORT}`)})
+  });
+

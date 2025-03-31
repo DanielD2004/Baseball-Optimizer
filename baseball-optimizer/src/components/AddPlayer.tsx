@@ -24,39 +24,30 @@ interface Player {
     team_id: string;
     skill: number;
     positions: {[key: string]: PositionOption};
-	player_id: string;
+	player_id?: string;
+	default: boolean;
 }
 
 interface AddPlayerProps {
 	updatePlayers: () => void;
-	player: Player | null;
+	player: Player;
 }
 
 const AddPlayer = ({updatePlayers, player}: AddPlayerProps) => {
-	const [name, setName] = useState<string>(player ? player.player_name : "");
-	const [rating, setRating] = useState<number>(2.5);
-	const positions: string[] = ["1B", "2B", "3B", "SS", "P", "C", "LF", "LC", "RC", "RF"];
+	const [name, setName] = useState<string>(player.player_name);
+	const [rating, setRating] = useState<number>(player.skill);
 	const location = useLocation()
     const team: Team = location.state;
-
-    const positionOptions: PositionOption[] = [
+	
+	const positionOptions: PositionOption[] = [
 		// maybe fix this one day
 		{ label: "Wants To Play" },
 		{ label: "Can Play" },
 		{ label: "Cannot Play" }
-	  ]
-	  
-	const [selectedPositions, setSelectedPositions] = useState<{ [key: string]: PositionOption }>({
-		"1B": positionOptions[2],
-		"2B": positionOptions[2],
-		"3B": positionOptions[2],
-		"SS": positionOptions[2],
-		"P": positionOptions[2],
-		"C": positionOptions[2],
-		"LF": positionOptions[2],
-		"LC": positionOptions[2],
-		"RC": positionOptions[2],	
-	});
+	]
+	
+
+	const [selectedPositions, setSelectedPositions] = useState<{ [key: string]: PositionOption }>(player.positions);
 
 	const handleChange = (selectedOption: PositionOption, position: string) => {
 		setSelectedPositions(prev => ({
@@ -109,60 +100,54 @@ const AddPlayer = ({updatePlayers, player}: AddPlayerProps) => {
 		if (name.trim() == "") {
 			alert("Please Fill Out All Fields");
 			e.preventDefault()
+			return;
 		}
 		else{
-			if(player) {updatePlayer(); return}
-			else{AddPlayer();}
+			if(!player.default) {
+				updatePlayer(); 
+				return
+			}
+			AddPlayer();
 		}
 	}
 	
 	const handleRatingChange = (rating: number) => {
 		setRating(rating);
 	}
-
-	const test = (phrase: string) => {
-		if (phrase.includes("Can Play")) {
-			return 1
-		}
-		if (phrase.includes("Wants To Play")) {
-			return 0
-		}
-		return 2
-	}
-
+	
 	useEffect(() => {
-		
-	}, []);
+		// console.log(team.team_id)
+	}, [team, name, rating]);
 
 	// entire add player dialog
     return (
 		<Dialog.Root>
 		<Dialog.Trigger asChild>
-			<button className="Button violet">{player ? player.player_name : "Add Player"}</button> 
+			<button className="Button violet">{player.default ? "Add a Player" : player.player_name}</button> 
 		</Dialog.Trigger>
 		<Dialog.Portal>
 			<Dialog.Overlay className="DialogOverlay" />
 			<Dialog.Content className="DialogContent">
-				<Dialog.Title className="DialogTitle">{player ? "Update Player" : "Add Player"}</Dialog.Title>
+				<Dialog.Title className="DialogTitle">{player.default ? "Add Player" : "Update Player"}</Dialog.Title>
 				<Dialog.Description className="DialogDescription">
-					{player ? "": "Add a player to your team, include their name, skill rating and position preferences"}
+					{player.default ? "Add a player to your team, include their name, skill rating and position preferences" : ""}
 				</Dialog.Description>
 				<fieldset className="Fieldset">
 					<label className="Label" htmlFor="name">
 						Name
 					</label>
-					<TextField style={{marginLeft: "10px"}} size="small" onChange={handleNameChange} value={name} label={player ? player.player_name : "Add Player"} variant="outlined"/>
+					<TextField style={{marginLeft: "10px"}} size="small" onChange={handleNameChange} value={name} label={player.default ? "Add Player" : player.player_name} variant="outlined"/>
 				</fieldset>
 				<fieldset className="Fieldset">
 					<label className="Label" htmlFor="rating">
 						Rating
 					</label>
-					<PlayerRating initialValue={player ? player.skill : 2.5} onRatingChange={handleRatingChange}/> 
+					<PlayerRating initialValue={player.default ? 2.5 : player.skill} onRatingChange={handleRatingChange}/>
 				</fieldset>
 				<div>
 				<div style={{display: "flex", flexDirection: "column", alignItems: "center", gap: "20px"}}>
 					{/* if theres a player, show their preferences, else show initial options */}
-					{player ? Object.entries(player.positions).map(([key, {label} ]) => ( 
+					{Object.entries(player.positions).map(([key, {label} ]) => ( 
 					<div key={key} style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "20px" }}>
 						<h2>{key}</h2>
 						<Select
@@ -177,22 +162,6 @@ const AddPlayer = ({updatePlayers, player}: AddPlayerProps) => {
 								}),
 							}}
 							onChange={(selectedOption: PositionOption) => handleChange(selectedOption, key)}
-						/>	
-					</div>
-					)) : positions.map((position) => (
-					<div key={position} style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "20px" }}>
-						<h2>{position}</h2>
-						<Select
-							options={positionOptions}
-							id={position}
-							styles={{
-								control: (baseStyles, state) => ({
-									...baseStyles,
-									width: 300,
-									borderRadius: state.isFocused ? "50px" : "0px",
-								}),
-							}}
-							onChange={(selectedOption: PositionOption) => handleChange(selectedOption, position)}
 						/>	
 					</div>
 					))}

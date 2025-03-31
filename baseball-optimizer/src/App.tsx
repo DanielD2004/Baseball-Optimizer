@@ -17,7 +17,7 @@ function App() {
       try{
         const data = {
           "user_id": user.id,
-          "full_name": user.fullName,
+          "full_name": user.fullName, 
           "email": user.emailAddresses[0].emailAddress,
         }
         const response = await fetch(`http://localhost:5000/api/users`, {
@@ -28,7 +28,6 @@ function App() {
         body: JSON.stringify(data)
       });
       const result = await response.json();
-      console.log(result)
       } catch (error) {
           console.error('Error fetching teams:', error);
       }
