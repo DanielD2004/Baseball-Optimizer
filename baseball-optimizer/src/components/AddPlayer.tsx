@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Dialog } from "radix-ui";
+import { Dialog, Switch } from "radix-ui";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import "./AddPlayer.css";
 import Select from "react-select";
@@ -26,6 +26,7 @@ interface Player {
     positions: {[key: string]: PositionOption};
 	player_id?: string;
 	default: boolean;
+	gender: string;
 }
 
 interface AddPlayerProps {
@@ -35,10 +36,13 @@ interface AddPlayerProps {
 
 const AddPlayer = ({updatePlayers, player}: AddPlayerProps) => {
 	const [name, setName] = useState<string>(player.player_name);
+	const genderinit = player.gender;
 	const [rating, setRating] = useState<number>(player.skill);
+	const [selectedPositions, setSelectedPositions] = useState<{ [key: string]: PositionOption }>(player.positions);
+	const [gender, setGender] = useState<string>(genderinit);
 	const location = useLocation()
     const team: Team = location.state;
-	
+
 	const positionOptions: PositionOption[] = [
 		// maybe fix this one day
 		{ label: "Wants To Play" },
@@ -46,9 +50,6 @@ const AddPlayer = ({updatePlayers, player}: AddPlayerProps) => {
 		{ label: "Cannot Play" }
 	]
 	
-
-	const [selectedPositions, setSelectedPositions] = useState<{ [key: string]: PositionOption }>(player.positions);
-
 	const handleChange = (selectedOption: PositionOption, position: string) => {
 		setSelectedPositions(prev => ({
             ...prev,
@@ -60,24 +61,37 @@ const AddPlayer = ({updatePlayers, player}: AddPlayerProps) => {
 		setName(e.target.value);
 	};
 
-	const updatePlayer = async() => {
+	const updatePlayer = async () => {
 		if (!player) return;
-		const response = await fetch(`http://localhost:5000/api/teams/${team.team_id}/players/update`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				player_id: player.player_id,
-				player_name: name,
-				skill: rating,
-				positions: selectedPositions
+		try {
+			const response = await fetch(`http://localhost:5000/api/teams/${team.team_id}/players/update`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					player_id: player.player_id,
+					player_name: name,
+					skill: rating,
+					positions: selectedPositions,
+					gender: gender
+				})
 			})
-		});
-		const res = await response.json();
-		// send emit to parent to update players
-		updatePlayers();
-	}
+			
+			if (!response.ok) {
+				// HTTP error
+				console.error(`${response.status}`);
+				return;
+			}
+	
+			const res = await response.json();
+			console.log(res);
+			// console.log(test)
+			updatePlayers();
+		} catch (error) {
+			console.error(error);
+		}
+	};
 
 	const AddPlayer = async() => {
     		const response = await fetch(`http://localhost:5000/api/teams/${team.team_id}/players`, {
@@ -88,27 +102,33 @@ const AddPlayer = ({updatePlayers, player}: AddPlayerProps) => {
     			body: JSON.stringify({
     				player_name: name,
     				skill: rating,
-    				positions: selectedPositions
+    				positions: selectedPositions,
+					gender: gender
     			})
     		  });
     		  const res = await response.json();
-    		  // send emit to parent to update players
+
+			  // send emit to parent to update players
     		  updatePlayers();
     	}
 
-	const checkSubmit = (e) => {
+	const checkSubmit = (e: React.MouseEvent<MouseEvent>) => {
 		if (name.trim() == "") {
 			alert("Please Fill Out All Fields");
 			e.preventDefault()
 			return;
 		}
 		else{
-			if(!player.default) {
-				updatePlayer(); 
+			if(player.default) {
+				AddPlayer();
 				return
 			}
-			AddPlayer();
+			updatePlayer(); 
 		}
+	}
+	
+	const handleGenderChange = (checked: boolean) => {
+		setGender(checked ? "Female" : "Male"); 
 	}
 	
 	const handleRatingChange = (rating: number) => {
@@ -116,8 +136,7 @@ const AddPlayer = ({updatePlayers, player}: AddPlayerProps) => {
 	}
 	
 	useEffect(() => {
-		// console.log(team.team_id)
-	}, [team, name, rating]);
+	}, []);
 
 	// entire add player dialog
     return (
@@ -132,20 +151,28 @@ const AddPlayer = ({updatePlayers, player}: AddPlayerProps) => {
 				<Dialog.Description className="DialogDescription">
 					{player.default ? "Add a player to your team, include their name, skill rating and position preferences" : ""}
 				</Dialog.Description>
+
 				<fieldset className="Fieldset">
 					<label className="Label" htmlFor="name">
 						Name
 					</label>
 					<TextField style={{marginLeft: "10px"}} size="small" onChange={handleNameChange} value={name} label={player.default ? "Add Player" : player.player_name} variant="outlined"/>
+					<label className="Label" htmlFor="gender">Male:</label>
+					<Switch.Root onCheckedChange={handleGenderChange} defaultChecked={player.gender !== "Male"} className="SwitchRoot" id="gender-switch" >
+						<Switch.Thumb className="SwitchThumb" />
+					</Switch.Root>
+					<label style={{marginLeft: "-10%"}} className="Label" htmlFor="gender">Female</label>
 				</fieldset>
+
 				<fieldset className="Fieldset">
-					<label className="Label" htmlFor="rating">
+					<label style={{marginLeft: "-8%"}} className="Label" htmlFor="rating">
 						Rating
 					</label>
 					<PlayerRating initialValue={player.default ? 2.5 : player.skill} onRatingChange={handleRatingChange}/>
 				</fieldset>
+				
 				<div>
-				<div style={{display: "flex", flexDirection: "column", alignItems: "center", gap: "20px"}}>
+				<div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
 					{/* if theres a player, show their preferences, else show initial options */}
 					{Object.entries(player.positions).map(([key, {label} ]) => ( 
 					<div key={key} style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "20px" }}>
@@ -170,7 +197,7 @@ const AddPlayer = ({updatePlayers, player}: AddPlayerProps) => {
 					style={{ display: "flex", marginTop: 25, justifyContent: "flex-end" }}
 				>
 					<Dialog.Close asChild>
-						<button onClick={checkSubmit} className="Button green">{player ? "Update Player" : "Add Player"}</button>
+						<button onClick={checkSubmit} className="Button green">{player.default ? "Add Player" : "Update Player"}</button>
 					</Dialog.Close>
 				</div>
 				</div>

@@ -9,7 +9,7 @@ function Header() {
   const { pathname } = location;
   return (
     <div id="header">
-      <div id="user-button" style={{paddingLeft: "10px", paddingTop: "10px"}}>
+      <div id="user-button" style={{paddingLeft: "30px", paddingTop: "5px"}}>
           <UserButton
               appearance={{
                   elements: {

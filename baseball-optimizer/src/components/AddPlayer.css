@@ -158,3 +158,33 @@ input {
 		transform: translate(-50%, -50%) scale(1);
 	}
 }
+
+.SwitchRoot {
+	width: 42px;
+	height: 25px;
+	border: 1px solid black;
+	background-color: var(--black-a6);
+	border-radius: 9999px;
+	position: relative;
+	box-shadow: 0 2px 6px var(--black-a7);
+	transition: 100ms;
+	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+	&[data-state="checked"] {
+		background-color: rgb(19, 19, 19);
+	}
+}
+
+.SwitchThumb {
+	display: block;
+	width: 21px;
+	height: 21px;
+	background-color: white;
+	border-radius: 100%;
+	box-shadow: 0 2px 2px var(--black-a7);
+	transition: transform 100ms;
+	transform: translateX(2px);
+	will-change: transform;
+	&[data-state="checked"] {
+		transform: translateX(19px);
+	}
+}

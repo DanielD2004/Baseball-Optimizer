@@ -3,6 +3,7 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom'
 import { useUser } from '@clerk/clerk-react'
 import './TeamPage.css'
 import AddPlayer from '../components/AddPlayer'
+import ImportanceModal from '../components/ImportanceModal'
 
 interface Team {
     team_id: string;
@@ -23,6 +24,7 @@ interface Player {
     positions: {[key: string]: PositionOption};
     player_id?: string;
     default: boolean;
+    gender: string;
 }
 
 
@@ -57,12 +59,13 @@ function TeamPage() {
             "RC": positionOptions[2],	
             "RF": positionOptions[2],
             },
-            default: true
+            default: true,
+            gender: "Male"
     }
 
     const fetchPlayers = async () =>{
         try {
-            const response = await fetch(`http://localhost:5000/teams/${team.team_id}/players`, {
+            const response = await fetch(`http://localhost:5000/api/teams/${team.team_id}/players`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -123,12 +126,15 @@ function TeamPage() {
                     </>
                     )}
                     <br/>
-                    <AddPlayer updatePlayers={fetchPlayers} player={defaultPlayer}/>
+                    <AddPlayer key={players.length} updatePlayers={fetchPlayers} player={defaultPlayer}/>
                 </>
             ) : (
                 <h2>No data</h2>
             )
         }
+            <div style={{position: "absolute", bottom: "50vh", margin: "20px", right: 50, width: "150px", height: "150px"}}>
+                <ImportanceModal />
+            </div>
         </div>
     ) 
 }
