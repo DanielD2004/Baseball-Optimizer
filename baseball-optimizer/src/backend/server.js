@@ -152,18 +152,32 @@ app.get("/api/teams/:team_id/players", async(req, res) => {
 })
 
 app.post("/api/teams/:team_id/importance", async (req, res) => {
-  res.status(200).json(req.body);
-  const { importance } = req.body;
+  const { user_id, importance } = req.body;
   const { team_id } = req.params;
   try {
-    const positionCollection = db.collection("Position_Importance");
-    const result = await positionCollection.updateOne(
+    const importanceCollection = db.collection("Position_Importance");
+    const result = await importanceCollection.updateOne(
       { team_id, user_id },
       { 
-        $set: { team_id, user_id, importance } ,
+        $set: { 
+          team_id, 
+          user_id, 
+          importance: { importance }  // Explicitly ensure full object is stored
+      } ,
       }, { upsert: true }
     )
     return res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+})
+
+app.get("/api/teams/:team_id/importance", async(req, res) => {
+  const { team_id } = req.params;
+  try {
+    const importanceCollection = db.collection("Position_Importance");
+    const result = await importanceCollection.findOne({ team_id });
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ error });
   }

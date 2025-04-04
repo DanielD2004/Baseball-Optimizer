@@ -1,86 +1,75 @@
 import React, { useEffect, useState } from "react";
-import { Dialog, Switch } from "radix-ui";
+import { Dialog } from "radix-ui";
 import { Cross2Icon } from "@radix-ui/react-icons";
-import { Slider } from "radix-ui"
-import { useLocation } from "react-router-dom"
-import "./ImportanceModal.css"
-import { Value } from "@radix-ui/themes/components/data-list";
+import { Slider } from "radix-ui";
+import "./ImportanceModal.css";
 
 interface Team {
     team_id: string;
     user_id: string;
 }
 
-const ImportanceModal = () => {
-    const positions = ["1B", "2B", "3B", "SS", "P", "C", "LF", "LC", "RC", "RF"];
-    const location = useLocation()
-    const team: Team = location.state;
-    const [importance, setImportance] = useState({
-        "1B": 50,
-        "2B": 50,
-        "3B": 50,
-        "SS": 50,
-        "P": 50,
-        "C": 50,
-        "LF": 50,
-        "LC": 50,
-        "RC": 50,
-        "RF": 50,
-    });
+interface Importance {
+    "1B": number;
+    "2B": number;
+    "3B": number;
+    "SS": number;
+    "P": number;
+    "C": number;
+    "LF": number;
+    "LC": number;
+    "RC": number;
+    "RF": number;
+}
+
+interface ImportanceModalProps {
+    updateImportance: (newImportance: Importance) => void;
+    initialImportance: Importance;
+}
+
+const ImportanceModal = ({ updateImportance, initialImportance }: ImportanceModalProps) => {
+    const [open, setOpen] = useState(false);
+    const [importance, setImportance] = useState<Importance>(initialImportance);
 
     const handleValueChange = (position: string, value: number) => {
         setImportance((prev) => ({
             ...prev,
-            [position]: value
+            [position]: value,
         }));
-    }
+    };
 
-    const handleSubmit = async() => {
-        const response = await fetch(`http://localhost:5000/api/teams/${team.team_id}/importance`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                user_id: team.user_id,
-                importance: importance
-            })
-        })
+    const handleSubmit = async () => {
+        updateImportance(importance);  // use prop
+        setOpen(false); // close the modal after update
+    };
 
-        if (!response.ok) {
-            // HTTP error
-            console.error(`${response.status}`);
-            return;
-        }
+    useEffect(() => {
+        setImportance(initialImportance);
+    }, [initialImportance]);
 
-        const res = await response.json();
-        console.log(res);
-    }
-
-	// entire add player dialog
     return (
-        <Dialog.Root>
-		<Dialog.Trigger asChild>
-			<button className="Button violet">Edit Position Importance</button>
-		</Dialog.Trigger>
-		<Dialog.Portal>
-			<Dialog.Overlay className="DialogOverlay" />
-			<Dialog.Content className="DialogContent">
-				<Dialog.Title style={{position: "absolute", top: "10px", left: "15px"}} className="DialogTitle">Edit Position Importance</Dialog.Title>
-				<Dialog.Description className="DialogDescription">
-					Edit the importance you give to each position, this will be used to calculate the optimal defensive linup
-				</Dialog.Description>
-				
-                <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
-					{/* if theres a player, show their preferences, else show initial options */}
-					{positions.map((position: string) => ( 
-					<div key={position} style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "20px" }}>
-						<h2>{position}</h2>
-                        {/* value is an array with one element, the value of the slider */}
-						<Slider.Root onValueChange={(value: number[]) => {handleValueChange(position, value[0])}}
+        <Dialog.Root open={open} onOpenChange={setOpen}>
+            <Dialog.Trigger asChild>
+                <button className="Button violet">Edit Position Importance</button>
+            </Dialog.Trigger>
+            <Dialog.Portal>
+                <Dialog.Overlay className="DialogOverlay" />
+                <Dialog.Content className="DialogContent">
+                    <Dialog.Title className="DialogTitle">Edit Position Importance</Dialog.Title>
+                    <Dialog.Description className="DialogDescription">
+                        Edit the importance you give to each position, this will be used to calculate the optimal defensive lineup.
+                    </Dialog.Description>
+
+                    <div className="SliderHolder" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                    {Object.entries(importance).map(([position, initialValue]) => (
+                            <div key={position} style={{ display: "flex", gap: "20px", alignItems: "center" }}>
+                                <h2 style={{marginRight: "30px", width:'35px', textAlign: "right"}}>{position}: </h2>
+                                <Slider.Root
+                                    value={[importance[position]]}  // Controlled value
+                                    onValueChange={(value) => handleValueChange(position, value[0])}
                                     className="SliderRoot"
-                                    defaultValue={[50]}
                                     max={100}
+                                    min={0}
                                     step={1}
                                 >
                                     <Slider.Track className="SliderTrack">
@@ -88,27 +77,21 @@ const ImportanceModal = () => {
                                     </Slider.Track>
                                     <Slider.Thumb className="SliderThumb" aria-label="Volume" />
                                 </Slider.Root>
-					</div>
-					))}
-				</div>
+                                <h2 >{initialValue}%</h2>
+                            </div>
+                        ))}
+                    </div>
 
-				<div
-					style={{ display: "flex", marginTop: 25, justifyContent: "flex-end" }}
-				>
-					<Dialog.Close asChild>
-						<button className="Button green">Save changes</button>
-					</Dialog.Close>
-				</div>
+                    <div style={{ display: "flex", marginTop: 25, justifyContent: "flex-end" }}>
+                        <button onClick={handleSubmit} className="Button green">Save changes</button>
+                    </div>
 
-				<Dialog.Close asChild>
-					<button onClick={handleSubmit} className="IconButton" aria-label="Close">
-						<Cross2Icon />
-					</button>
-				</Dialog.Close>
-
-			</Dialog.Content>
-		</Dialog.Portal>
-	</Dialog.Root>
+                    <button onClick={() => setOpen(false)} className="IconButton" aria-label="Close">
+                        <Cross2Icon />
+                    </button>
+                </Dialog.Content>
+            </Dialog.Portal>
+        </Dialog.Root>
     );
 };
 

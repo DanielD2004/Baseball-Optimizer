@@ -36,10 +36,9 @@ interface AddPlayerProps {
 
 const AddPlayer = ({updatePlayers, player}: AddPlayerProps) => {
 	const [name, setName] = useState<string>(player.player_name);
-	const genderinit = player.gender;
 	const [rating, setRating] = useState<number>(player.skill);
 	const [selectedPositions, setSelectedPositions] = useState<{ [key: string]: PositionOption }>(player.positions);
-	const [gender, setGender] = useState<string>(genderinit);
+	const [gender, setGender] = useState<string>(player.gender);
 	const location = useLocation()
     const team: Team = location.state;
 
