@@ -1,0 +1,536 @@
+{
+  "players": [
+    {
+      "_id": "67f0a270d2a2b7eca2daa157",
+      "skill": 3.5,
+      "positions": {
+        "1B": {
+          "label": "Wants To Play"
+        },
+        "2B": {
+          "label": "Wants To Play"
+        },
+        "3B": {
+          "label": "Wants To Play"
+        },
+        "SS": {
+          "label": "Wants To Play"
+        },
+        "P": {
+          "label": "Cannot Play"
+        },
+        "C": {
+          "label": "Can Play"
+        },
+        "LF": {
+          "label": "Cannot Play"
+        },
+        "LC": {
+          "label": "Cannot Play"
+        },
+        "RC": {
+          "label": "Cannot Play"
+        },
+        "RF": {
+          "label": "Cannot Play"
+        }
+      },
+      "team_id": "67e5e7868bbc3966d9101a4f",
+      "player_name": "Greg",
+      "gender": "Male",
+      "player_id": "67f0a271fea2b0a9cca94d90"
+    },
+    {
+      "_id": "67f0a3dad2a2b7eca2daa159",
+      "player_name": "Daniel",
+      "positions": {
+        "1B": {
+          "label": "Cannot Play"
+        },
+        "2B": {
+          "label": "Cannot Play"
+        },
+        "3B": {
+          "label": "Cannot Play"
+        },
+        "SS": {
+          "label": "Cannot Play"
+        },
+        "P": {
+          "label": "Cannot Play"
+        },
+        "C": {
+          "label": "Can Play"
+        },
+        "LF": {
+          "label": "Wants To Play"
+        },
+        "LC": {
+          "label": "Wants To Play"
+        },
+        "RC": {
+          "label": "Wants To Play"
+        },
+        "RF": {
+          "label": "Wants To Play"
+        }
+      },
+      "team_id": "67e5e7868bbc3966d9101a4f",
+      "skill": 3.5,
+      "gender": "Male",
+      "player_id": "67f0a3dafea2b0a9cca94d91"
+    },
+    {
+      "_id": "67f0a3f0d2a2b7eca2daa15a",
+      "team_id": "67e5e7868bbc3966d9101a4f",
+      "skill": 1,
+      "positions": {
+        "1B": {
+          "label": "Can Play"
+        },
+        "2B": {
+          "label": "Cannot Play"
+        },
+        "3B": {
+          "label": "Can Play"
+        },
+        "SS": {
+          "label": "Cannot Play"
+        },
+        "P": {
+          "label": "Cannot Play"
+        },
+        "C": {
+          "label": "Can Play"
+        },
+        "LF": {
+          "label": "Can Play"
+        },
+        "LC": {
+          "label": "Cannot Play"
+        },
+        "RC": {
+          "label": "Cannot Play"
+        },
+        "RF": {
+          "label": "Can Play"
+        }
+      },
+      "player_name": "Gabriel",
+      "gender": "Male",
+      "player_id": "67f0a3f1fea2b0a9cca94d92"
+    },
+    {
+      "_id": "67f0a3fbd2a2b7eca2daa15b",
+      "player_name": "Robert",
+      "positions": {
+        "1B": {
+          "label": "Can Play"
+        },
+        "2B": {
+          "label": "Cannot Play"
+        },
+        "3B": {
+          "label": "Can Play"
+        },
+        "SS": {
+          "label": "Cannot Play"
+        },
+        "P": {
+          "label": "Cannot Play"
+        },
+        "C": {
+          "label": "Can Play"
+        },
+        "LF": {
+          "label": "Cannot Play"
+        },
+        "LC": {
+          "label": "Cannot Play"
+        },
+        "RC": {
+          "label": "Cannot Play"
+        },
+        "RF": {
+          "label": "Cannot Play"
+        }
+      },
+      "team_id": "67e5e7868bbc3966d9101a4f",
+      "skill": 1,
+      "gender": "Male",
+      "player_id": "67f0a3fbfea2b0a9cca94d93"
+    },
+    {
+      "_id": "67f0a410d2a2b7eca2daa15c",
+      "player_name": "Ken",
+      "positions": {
+        "1B": {
+          "label": "Can Play"
+        },
+        "2B": {
+          "label": "Cannot Play"
+        },
+        "3B": {
+          "label": "Cannot Play"
+        },
+        "SS": {
+          "label": "Cannot Play"
+        },
+        "P": {
+          "label": "Cannot Play"
+        },
+        "C": {
+          "label": "Can Play"
+        },
+        "LF": {
+          "label": "Can Play"
+        },
+        "LC": {
+          "label": "Can Play"
+        },
+        "RC": {
+          "label": "Can Play"
+        },
+        "RF": {
+          "label": "Wants To Play"
+        }
+      },
+      "team_id": "67e5e7868bbc3966d9101a4f",
+      "skill": 1,
+      "gender": "Male",
+      "player_id": "67f0a410fea2b0a9cca94d94"
+    },
+    {
+      "_id": "67f0a425d2a2b7eca2daa15d",
+      "player_name": "Paul ",
+      "positions": {
+        "1B": {
+          "label": "Can Play"
+        },
+        "2B": {
+          "label": "Can Play"
+        },
+        "3B": {
+          "label": "Wants To Play"
+        },
+        "SS": {
+          "label": "Wants To Play"
+        },
+        "P": {
+          "label": "Cannot Play"
+        },
+        "C": {
+          "label": "Can Play"
+        },
+        "LF": {
+          "label": "Can Play"
+        },
+        "LC": {
+          "label": "Can Play"
+        },
+        "RC": {
+          "label": "Can Play"
+        },
+        "RF": {
+          "label": "Can Play"
+        }
+      },
+      "team_id": "67e5e7868bbc3966d9101a4f",
+      "skill": 2.5,
+      "gender": "Male",
+      "player_id": "67f0a426fea2b0a9cca94d95"
+    },
+    {
+      "_id": "67f0a43ad2a2b7eca2daa15e",
+      "team_id": "67e5e7868bbc3966d9101a4f",
+      "player_name": "Eric",
+      "positions": {
+        "1B": {
+          "label": "Can Play"
+        },
+        "2B": {
+          "label": "Can Play"
+        },
+        "3B": {
+          "label": "Can Play"
+        },
+        "SS": {
+          "label": "Can Play"
+        },
+        "P": {
+          "label": "Can Play"
+        },
+        "C": {
+          "label": "Can Play"
+        },
+        "LF": {
+          "label": "Wants To Play"
+        },
+        "LC": {
+          "label": "Wants To Play"
+        },
+        "RC": {
+          "label": "Wants To Play"
+        },
+        "RF": {
+          "label": "Wants To Play"
+        }
+      },
+      "skill": 5,
+      "gender": "Male",
+      "player_id": "67f0a43afea2b0a9cca94d96"
+    },
+    {
+      "_id": "67f0a450d2a2b7eca2daa15f",
+      "team_id": "67e5e7868bbc3966d9101a4f",
+      "player_name": "Bryan",
+      "positions": {
+        "1B": {
+          "label": "Can Play"
+        },
+        "2B": {
+          "label": "Can Play"
+        },
+        "3B": {
+          "label": "Can Play"
+        },
+        "SS": {
+          "label": "Wants To Play"
+        },
+        "P": {
+          "label": "Cannot Play"
+        },
+        "C": {
+          "label": "Can Play"
+        },
+        "LF": {
+          "label": "Wants To Play"
+        },
+        "LC": {
+          "label": "Wants To Play"
+        },
+        "RC": {
+          "label": "Wants To Play"
+        },
+        "RF": {
+          "label": "Wants To Play"
+        }
+      },
+      "skill": 4,
+      "gender": "Male",
+      "player_id": "67f0a450fea2b0a9cca94d97"
+    },
+    {
+      "_id": "67f0a460d2a2b7eca2daa160",
+      "team_id": "67e5e7868bbc3966d9101a4f",
+      "skill": 1,
+      "positions": {
+        "1B": {
+          "label": "Can Play"
+        },
+        "2B": {
+          "label": "Can Play"
+        },
+        "3B": {
+          "label": "Cannot Play"
+        },
+        "SS": {
+          "label": "Cannot Play"
+        },
+        "P": {
+          "label": "Cannot Play"
+        },
+        "C": {
+          "label": "Can Play"
+        },
+        "LF": {
+          "label": "Cannot Play"
+        },
+        "LC": {
+          "label": "Cannot Play"
+        },
+        "RC": {
+          "label": "Cannot Play"
+        },
+        "RF": {
+          "label": "Can Play"
+        }
+      },
+      "player_name": "Robyn",
+      "gender": "Female",
+      "player_id": "67f0a461fea2b0a9cca94d98"
+    },
+    {
+      "_id": "67f0a470d2a2b7eca2daa161",
+      "player_name": "Nicole",
+      "skill": 3,
+      "team_id": "67e5e7868bbc3966d9101a4f",
+      "positions": {
+        "1B": {
+          "label": "Can Play"
+        },
+        "2B": {
+          "label": "Cannot Play"
+        },
+        "3B": {
+          "label": "Cannot Play"
+        },
+        "SS": {
+          "label": "Cannot Play"
+        },
+        "P": {
+          "label": "Cannot Play"
+        },
+        "C": {
+          "label": "Can Play"
+        },
+        "LF": {
+          "label": "Wants To Play"
+        },
+        "LC": {
+          "label": "Cannot Play"
+        },
+        "RC": {
+          "label": "Cannot Play"
+        },
+        "RF": {
+          "label": "Cannot Play"
+        }
+      },
+      "gender": "Female",
+      "player_id": "67f0a470fea2b0a9cca94d99"
+    },
+    {
+      "_id": "67f0a47cd2a2b7eca2daa162",
+      "player_name": "Stephanie",
+      "positions": {
+        "1B": {
+          "label": "Wants To Play"
+        },
+        "2B": {
+          "label": "Wants To Play"
+        },
+        "3B": {
+          "label": "Cannot Play"
+        },
+        "SS": {
+          "label": "Cannot Play"
+        },
+        "P": {
+          "label": "Cannot Play"
+        },
+        "C": {
+          "label": "Can Play"
+        },
+        "LF": {
+          "label": "Cannot Play"
+        },
+        "LC": {
+          "label": "Cannot Play"
+        },
+        "RC": {
+          "label": "Cannot Play"
+        },
+        "RF": {
+          "label": "Cannot Play"
+        }
+      },
+      "team_id": "67e5e7868bbc3966d9101a4f",
+      "skill": 2.5,
+      "gender": "Female",
+      "player_id": "67f0a47dfea2b0a9cca94d9a"
+    },
+    {
+      "_id": "67f0a48dd2a2b7eca2daa163",
+      "player_name": "Adam",
+      "skill": 4,
+      "team_id": "67e5e7868bbc3966d9101a4f",
+      "positions": {
+        "1B": {
+          "label": "Cannot Play"
+        },
+        "2B": {
+          "label": "Cannot Play"
+        },
+        "3B": {
+          "label": "Cannot Play"
+        },
+        "SS": {
+          "label": "Can Play"
+        },
+        "P": {
+          "label": "Wants To Play"
+        },
+        "C": {
+          "label": "Cannot Play"
+        },
+        "LF": {
+          "label": "Can Play"
+        },
+        "LC": {
+          "label": "Can Play"
+        },
+        "RC": {
+          "label": "Cannot Play"
+        },
+        "RF": {
+          "label": "Cannot Play"
+        }
+      },
+      "gender": "Male",
+      "player_id": "67f0a48efea2b0a9cca94d9b"
+    },
+    {
+      "_id": "67f0a4cdd2a2b7eca2daa164",
+      "skill": 4,
+      "player_name": "Kevin",
+      "positions": {
+        "1B": {
+          "label": "Cannot Play"
+        },
+        "2B": {
+          "label": "Cannot Play"
+        },
+        "3B": {
+          "label": "Cannot Play"
+        },
+        "SS": {
+          "label": "Can Play"
+        },
+        "P": {
+          "label": "Wants To Play"
+        },
+        "C": {
+          "label": "Cannot Play"
+        },
+        "LF": {
+          "label": "Can Play"
+        },
+        "LC": {
+          "label": "Can Play"
+        },
+        "RC": {
+          "label": "Can Play"
+        },
+        "RF": {
+          "label": "Can Play"
+        }
+      },
+      "team_id": "67e5e7868bbc3966d9101a4f",
+      "gender": "Male",
+      "player_id": "67f0a4cefea2b0a9cca94d9c"
+    }
+  ],
+  "importance": {
+    "1B": 30,
+    "2B": 60,
+    "3B": 50,
+    "SS": 100,
+    "P": 50,
+    "C": 45,
+    "LF": 70,
+    "LC": 90,
+    "RC": 80,
+    "RF": 65
+  }
+}

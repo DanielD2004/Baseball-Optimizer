@@ -22,7 +22,7 @@ const Teams = () => {
 
     const fetchTeams = async(userID: string) => {
       try{
-        const response = await fetch(`http://localhost:5000/api/teams?userId=${userID}`, {
+        const response = await fetch(`http://localhost:5000/api/teams/${userID}`, {
         method: 'GET',
         headers: {
         'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ const Teams = () => {
     } else {
       console.log("User error")
     }
-  }, [user, division, teams]);
+  }, [user, division]);
 
   return (
     <div id="teams">

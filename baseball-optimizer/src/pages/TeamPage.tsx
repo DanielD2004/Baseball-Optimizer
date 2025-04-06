@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import './TeamPage.css';
 import AddPlayer from '../components/AddPlayer';
@@ -86,7 +86,7 @@ function TeamPage() {
         gender: "Male"
     };
 
-    const fetchPlayers = useCallback(async () => {
+    const fetchPlayers = async () => {
         try {
             const response = await fetch(`http://localhost:5000/api/teams/${team.team_id}/players`, {
                 method: 'GET',
@@ -101,7 +101,7 @@ function TeamPage() {
         } catch (err) {
             console.error(err);
         }
-    }, [team.team_id]);
+    };
     
     const fetchImportance = async () => {
         try {
@@ -113,8 +113,8 @@ function TeamPage() {
             });
             const data = await response.json();
             if (data) {
-                console.log("Here is the data that were fetched ", data.importance.importance)
-                setImportance(data.importance.importance);
+                console.log("Here is the data that were fetched ", data.importance)
+                setImportance(data.importance);
             } else {
                 console.log("No importance data found, using defaults.");
             }
@@ -131,7 +131,6 @@ function TeamPage() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    user_id: team.user_id,
                     importance: newImportance,
                 }),
             });
@@ -159,7 +158,7 @@ function TeamPage() {
         }
 
         fetchPlayers();
-    }, [user, team, fetchPlayers]);
+    }, [user, team]);
 
     useEffect(()=>{
         fetchImportance();
@@ -171,7 +170,9 @@ function TeamPage() {
                 <>
                     <div className="team-bio">
                         <h1>{team.division}</h1>
-                        <h1>{team.team_name}</h1>
+                        <h2>
+                            <Link to={`/teams/${team.team_name}/${team.season}/optimized`} state={team}>{team.team_name}</Link>  
+                        </h2>
                         <h1>{team.season}</h1>
                     </div>
                     {players.length > 0 && (

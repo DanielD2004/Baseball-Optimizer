@@ -3,6 +3,8 @@ import express from "express";
 import { MongoClient, ServerApiVersion, ObjectId } from "mongodb";
 import cors from "cors";
 import dotenv from "dotenv";
+import fs from 'fs';
+import fetch from 'node-fetch';
 
 dotenv.config();
 
@@ -86,9 +88,9 @@ app.post("/api/teams", async (req, res) => {
     const teamsCollection = db.collection("Teams");
     const result = await teamsCollection.updateOne(
       { user_id, team_name, season, division },
-      { 
-        $set: { user_id, team_name, season, division } ,
-        $setOnInsert: {team_id: new ObjectId()},
+      {
+        $set: { user_id, team_name, season, division },
+        $setOnInsert: { team_id: new ObjectId().toString() },
       },
       { upsert: true }
     )
@@ -106,9 +108,9 @@ app.post("/api/teams/:team_id/players", async (req, res) => {
     const playersCollection = db.collection("Players");
     const result = await playersCollection.updateOne(
       { player_name, skill, positions, team_id },
-      { 
-        $set: { player_name, skill, positions, team_id, gender } ,
-        $setOnInsert: {player_id: new ObjectId().toString()},
+      {
+        $set: { player_name, skill, positions, team_id, gender },
+        $setOnInsert: { player_id: new ObjectId().toString() },
       },
       { upsert: true }
     )
@@ -128,9 +130,9 @@ app.post("/api/teams/:team_id/players/update", async (req, res) => {
     const result = await playersCollection.updateOne(
       // check if player with same teamID and playerID exists
       { player_id, team_id },
-      { 
+      {
         // update player if it exists, else insert with  player_id
-        $set: { player_name, skill, positions, team_id, gender, player_id } ,
+        $set: { player_name, skill, positions, team_id, gender, player_id },
       }
     )
     return res.status(200).json(result);
@@ -140,7 +142,7 @@ app.post("/api/teams/:team_id/players/update", async (req, res) => {
 });
 
 // get all players for a team
-app.get("/api/teams/:team_id/players", async(req, res) => {
+app.get("/api/teams/:team_id/players", async (req, res) => {
   const { team_id } = req.params;
   try {
     const playersCollection = db.collection("Players");
@@ -158,12 +160,12 @@ app.post("/api/teams/:team_id/importance", async (req, res) => {
     const importanceCollection = db.collection("Position_Importance");
     const result = await importanceCollection.updateOne(
       { team_id, user_id },
-      { 
-        $set: { 
-          team_id, 
-          user_id, 
-          importance: { importance }  // Explicitly ensure full object is stored
-      } ,
+      {
+        $set: {
+          team_id,
+          user_id,
+          importance
+        },
       }, { upsert: true }
     )
     return res.status(200).json(result);
@@ -172,7 +174,7 @@ app.post("/api/teams/:team_id/importance", async (req, res) => {
   }
 })
 
-app.get("/api/teams/:team_id/importance", async(req, res) => {
+app.get("/api/teams/:team_id/importance", async (req, res) => {
   const { team_id } = req.params;
   try {
     const importanceCollection = db.collection("Position_Importance");
@@ -183,8 +185,50 @@ app.get("/api/teams/:team_id/importance", async(req, res) => {
   }
 })
 
-connectToDatabase().then(() => {
-  app.listen(PORT, () =>{
-    console.log(`Server running on http://localhost:${PORT}`)})
-  });
+app.post("/api/teams/:team_id/json", async (req, res) => {
+  const { players, importance } = req.body;
+  const { team_id } = req.params;
 
+  const teamData = {
+    players: players,
+    importance
+  };
+
+  // For debugging
+  console.log("Sending to optimizer:", JSON.stringify(teamData, null, 2));
+
+  try {
+    const response = await fetch('http://127.0.0.1:5001/optimize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(teamData),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Optimizer error (${response.status}): ${errorText}`);
+      return res.status(response.status).json({ 
+        error: 'Optimizer backend failed', 
+        details: errorText,
+        status: response.status
+      });
+    }
+
+    const data = await response.json();
+    res.status(200).json(data);
+  } catch (err) {
+    console.error('Error contacting optimizer:', err.message, err.stack);
+    res.status(500).json({ 
+      error: 'Optimizer backend failed', 
+      details: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
+  }
+});
+
+
+connectToDatabase().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`)
+  })
+});

@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import { SignedIn, SignedOut, SignInButton, useUser } from '@clerk/clerk-react'
 import Teams from './pages/Teams.tsx'
 import Header from './components/Header.tsx'
 import TeamPage from './pages/TeamPage.tsx'
+import OptimizedPage from './pages/OptimizedPage.tsx'
 import './App.css'
 
 function App() {
@@ -52,6 +53,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Teams/>}/>
             <Route path='/teams/:teamName/:season' element={<TeamPage/>}/>
+            <Route path='/teams/:teamName/:season/optimized' element={<OptimizedPage/>}/>
           </Routes>
         </SignedIn>
     </BrowserRouter>

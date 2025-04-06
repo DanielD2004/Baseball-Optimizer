@@ -1,0 +1,135 @@
+import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+
+interface Team {
+    team_id: string;
+    user_id: string;
+    team_name: string;
+    season: string;
+    division: string;
+}
+
+interface Schedule {
+    objective_value: number;
+    schedule: { [inning: number]: Inning };
+    player_sits: { [playerName: string]: number };
+}
+
+interface Inning {
+    field: Player[];
+    bench: Player[];
+}
+
+interface Player {
+    id: string;
+    name: string;
+    position: string;
+    skill: number;
+    gender: string;
+}
+
+function OptimizedPage() {
+    const [result, setResult] = useState<Schedule | null>(null);
+    const [players, setPlayers] = useState();
+    const [importance, setImportance] = useState();
+    const location = useLocation();
+    const team: Team = location.state as Team;
+
+    const fetchPlayers = async () => {
+        console.log("fetching players")
+            try {
+                const response = await fetch(`http://localhost:5000/api/teams/${team.team_id}/players`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                const data = await response.json();
+                if (data) {
+                    setPlayers(data);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+    const fetchImportance = async () => {
+        try {
+            const response = await fetch(`http://localhost:5000/api/teams/${team.team_id}/importance`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            const data = await response.json();
+            if (data) {
+                console.log("Here is the data that were fetched ", data.importance)
+                setImportance(data.importance);
+            } else {
+                console.log("No importance data found, using defaults.");
+            }
+        } catch (err) {
+            console.error("Error fetching importance:", err);
+        }
+    };
+
+    const getLineup = async () => {
+        try {
+            const response = await fetch(`http://localhost:5000/api/teams/${team.team_id}/lineup`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ players, importance }),
+            });
+    
+            const data = await response.json();
+            console.log(data);
+            setResult(data);
+        } catch (err) {
+            console.error(err);
+            setResult(null);
+        }
+    }
+
+    useEffect(() => {
+        fetchPlayers();
+        fetchImportance();
+    }, []);
+
+    useEffect(() => {
+        if (players && importance) {
+            getLineup();
+        }
+    }, [players, importance]);
+
+return (
+    <div>
+        <h1>Optimized Lineup</h1>
+        {result && (
+            <div className="scheduleHolder">
+                <h2 className="schedule">Schedule</h2>
+                {Object.entries(result.schedule).map(([inning, inningData]) => (
+                    <div key={inning}>
+                        <h3 className="inningNumber">Inning {inning}</h3>
+                        <h1 className="field">Field:</h1>
+                        <div className="playerList">
+                            {inningData.field.map((player) => (
+                                <h5 key={player.id} className="player-item">
+                                    {player.name} - {player.position}
+                                </h5>
+                            ))}
+                        </div>
+                        <h1 className="bench">Bench:</h1>
+                        <ul className="playerList">
+                            {inningData.bench.map((player) => (
+                                <h5 key={player.id} className="player-item">{player.name}</h5>
+                            ))}
+                        </ul>
+                    </div>
+                ))}
+            </div>
+            )} 
+        </div>
+);
+}
+
+export default OptimizedPage
