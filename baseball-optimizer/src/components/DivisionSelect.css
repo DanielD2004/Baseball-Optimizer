@@ -32,13 +32,5 @@ button {
 	width: 11px;
 	height: 11px;
 	border-radius: 50%;
-	background-color: white;
-}
-
-.Label {
-	color: black;
-	font-size: 15px;
-	line-height: 1;
-	padding-left: 15px;
-	margin-left:-35px;
+	background-color: rgb(245, 238, 255);
 }

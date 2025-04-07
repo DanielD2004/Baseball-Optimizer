@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
-import { InputLabel, TextField, Button } from '@mui/material';
+import { InputLabel, TextField } from '@mui/material';
 import DivisionSelect from '../components/DivisionSelect';
 import DatePicker from '../components/DatePicker';
 
@@ -69,22 +69,20 @@ const Teams = () => {
 
   return (
     <div id="teams">
-      <h1 id="my-teams-header" style={{}}>My Teams</h1>
-      <hr/>
+      <h1 id="my-teams-header" className="text-slate-600 uppercase text-7xl font-bold font-mono text-center tracking-wide">My Teams</h1>
+      <hr className='border-1'/>
       {teams.length > 0 ? (
         <div>
           {teams.map((team: Team) => (
-            <div key={team.team_id}>
-              <h2>
-                <Link to={`/teams/${team.team_name}/${team.season}`} state={team}>{team.team_name}</Link>  
+            <div key={team.team_id} className='border-l-2 border-r-2 border-b-2 border-dashed border-black w-1/6 p-5 mx-auto' >
+              <h2 className='mt-4 mb-4 font-bold text-2xl text-sky-500'>
+                <Link to={`/teams/${team.team_name}/${team.season}`} state={team} className='hover:text-blue-600 p-2 rounded-2xl border-3 border-gray-400 bg-gray-100 hover:bg-gray-200 hover:border-gray-500'>{team.team_name}</Link>  
               </h2>
-              <div style={{marginTop: "-20px"}}>
-                <span>Season: {team.season}</span>
-                <br/>
-                <span>League: {team.division}</span>
+              <div className='font-mono font-[550] text-lg tracking-wide'>
+                <span>{team.season} {team.division} division</span>
                 <br/>
               </div>
-              <hr/>
+              {/* <hr className="border-1 border-black w-1/4 mx-auto" /> */}
             </div>
           ))}
         </div>
@@ -92,12 +90,15 @@ const Teams = () => {
         <p>No teams found for this user.</p>
       )}
 
-       <div style={{ display: "flex", width: "100vw", marginTop: "20px", alignItems: "center", justifyContent: "center"}}>
-        <InputLabel>Add Team:</InputLabel>
-        <TextField style={{marginLeft: "10px"}} size="small" onChange={handleNameChange} value={teamName} label="Team Name" variant="outlined"/>
+       <div className="flex justify-center items-center w-full mt-10 select-none">
+        <h1 className='mr-3 font-[500]'>Add Team:</h1>
+        <TextField className="outline-1 font-[500] rounded-lg" size="small" onChange={handleNameChange} value={teamName} label="Team Name" variant="outlined"/>
         <DatePicker setYear={setYear}/>
         <DivisionSelect setDivision={setDivision}/>
-        <Button variant="contained" onClick={addTeam} style={{marginLeft: "50px"}}>Add Team</Button>
+        {/* <Button variant="contained" onClick={addTeam}>Add Team</Button> */}
+        <div className='ml-3 border-2 border-slate-400 bg-slate-100 hover:bg-gray-200 rounded-lg p-2 w-fit h-10 flex justify-center items-center cursor-pointer select-none'>
+          <button onClick={addTeam}>Add Team</button>
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,8 @@
+@import "tailwindcss";
+
 #root {
   text-align: center;
+  
 }
 
 body {

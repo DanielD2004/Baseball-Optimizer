@@ -21,35 +21,35 @@ const DivisionSelect: React.FC<DivisionSelectProps> = ({ setDivision }) => {
 				aria-label="View density"
 				onValueChange={handleValueChange}
 			>
-				<div style={{ display: "flex", alignItems: "center" }}>
+				<div className='flex align-center'>
 					<RadioGroup.Item className="RadioGroupItem" value="Mixed" id="r1">
 						<RadioGroup.Indicator className="RadioGroupIndicator" />
 					</RadioGroup.Item>
-					<label className="Label" htmlFor="r1">
+					<label className="ml-2 font-[450] tracking-wide text-violet-700" htmlFor="r1">
 						Mixed
 					</label>
 				</div>
-				<div style={{ display: "flex", alignItems: "center" }}>
+				<div className='flex align-center'>
 					<RadioGroup.Item className="RadioGroupItem" value="Mens" id="r2">
 						<RadioGroup.Indicator className="RadioGroupIndicator" />
 					</RadioGroup.Item>
-					<label className="Label" htmlFor="r2">
+					<label className="ml-2 font-[450] tracking-wide text-violet-700" htmlFor="r2">
 						Mens
 					</label>
 				</div>
-				<div style={{ display: "flex", alignItems: "center" }}>
+				<div className='flex align-center'>
 					<RadioGroup.Item className="RadioGroupItem" value="Masters" id="r3">
 						<RadioGroup.Indicator className="RadioGroupIndicator" />
 					</RadioGroup.Item>
-					<label className="Label" htmlFor="r3">
+					<label className="ml-2 font-[450] tracking-wide text-violet-700" htmlFor="r3">
 						Masters
 					</label>
 				</div>
-				<div style={{ display: "flex", alignItems: "center" }}>
+				<div className='flex align-center'>
 					<RadioGroup.Item className="RadioGroupItem" value="Ladies" id="r4">
 						<RadioGroup.Indicator className="RadioGroupIndicator" />
 					</RadioGroup.Item>
-					<label className="Label" htmlFor="r4">
+					<label className="ml-2 font-[450] tracking-wide text-violet-700" htmlFor="r4">
 						Ladies
 					</label>
 				</div>

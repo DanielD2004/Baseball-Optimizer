@@ -1,5 +1,4 @@
 import React from 'react'
-import './Header.css'
 import { UserButton } from '@clerk/clerk-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
@@ -8,8 +7,8 @@ function Header() {
   const location = useLocation();
   const { pathname } = location;
   return (
-    <div id="header">
-      <div id="user-button" style={{paddingLeft: "30px", paddingTop: "5px"}}>
+    <div id="header" className='flex justify-between items-center'>
+      <div id="user-button" className='ml-10 mt-5'>
           <UserButton
               appearance={{
                   elements: {
@@ -22,9 +21,11 @@ function Header() {
               showName
           />
       </div>
-      {pathname !== '/' && <div id="backButton">
-        <button onClick={() => navigate(-1)}>Back</button>
-      </div>}
+      {pathname !== '/' && 
+        <div className="border-2 mr-15 border-slate-400 bg-slate-100 hover:bg-gray-200 rounded-lg w-fit h-fit p-1 flex justify-center items-center cursor-pointer select-none text-lg">
+          <button onClick={() => navigate(-1)}>Back</button>
+        </div>
+      }
     </div>
   )
 }
