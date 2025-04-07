@@ -22,7 +22,7 @@ const Teams = () => {
 
     const fetchTeams = async(userID: string) => {
       try{
-        const response = await fetch(`http://localhost:5000/api/teams/${userID}`, {
+        const response = await fetch(`http://127.0.0.1:5000/api/teams/${userID}`, {
         method: 'GET',
         headers: {
         'Content-Type': 'application/json',
@@ -37,7 +37,7 @@ const Teams = () => {
 
   const addTeam = async() => {
     if (user && division && year){
-      const response = await fetch(`http://localhost:5000/api/teams`, {
+      const response = await fetch(`http://127.0.0.1:5000/api/teams`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

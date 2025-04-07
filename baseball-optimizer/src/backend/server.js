@@ -49,8 +49,8 @@ app.get("/", (req, res) => {
 });
 
 // get all teams for a user
-app.get("/api/teams", async (req, res) => {
-  const { userId } = req.query;
+app.get("/api/teams/:userId", async (req, res) => {
+  const { userId } = req.params;
   if (!userId) {
     return res.status(400).json({ error: "User ID is required" });
   }
@@ -226,6 +226,7 @@ app.post("/api/teams/:team_id/json", async (req, res) => {
   }
 });
 
+app.get('/ping', (req, res) => res.send('pong'));
 
 connectToDatabase().then(() => {
   app.listen(PORT, () => {

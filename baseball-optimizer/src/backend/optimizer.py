@@ -5,6 +5,7 @@ from flask_cors import CORS
 from tabulate import tabulate
 from flask import Flask, request, jsonify
 import logging
+import time
 from pymongo import MongoClient
 from bson import ObjectId
 from dotenv import dotenv_values
@@ -222,6 +223,7 @@ def index():
 # Get all teams for a user
 @app.route("/api/teams/<user_id>", methods=["GET"])
 def getTeams(user_id):
+    get_teams_start_time = time.time()
     if not user_id:
         return jsonify({"error": "No user id"}), 400
     try:
@@ -229,9 +231,26 @@ def getTeams(user_id):
         for team in teams:
             # mongodb stores _id as ObjectID
             team["_id"] = str(team["_id"])
+        get_teams_end_time = time.time()
+        processing_time = get_teams_end_time - get_teams_start_time
+        app.logger.debug(f"getTeams Processing Time: {processing_time:.4f} seconds")
         return jsonify(teams), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# # Get all teams for a user
+# @app.route("/api/teams/<user_id>", methods=["GET"])
+# def getTeams(user_id):
+#     if not user_id:
+#         return jsonify({"error": "No user id"}), 400
+#     try:
+#         teams = list(db.Teams.find({"user_id": user_id}))
+#         for team in teams:
+#             # mongodb stores _id as ObjectID
+#             team["_id"] = str(team["_id"])
+#         return jsonify(teams), 200
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
 
 # Add a user
 @app.route("/api/users", methods=["POST"])
@@ -372,6 +391,10 @@ def optimize(team_id):
             "error": "Optimization failed",
             "details": str(e)
         }), 500
+
+@app.route('/ping')
+def ping():
+    return 'pong'
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

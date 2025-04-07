@@ -38,7 +38,7 @@ function OptimizedPage() {
     const fetchPlayers = async () => {
         console.log("fetching players")
             try {
-                const response = await fetch(`http://localhost:5000/api/teams/${team.team_id}/players`, {
+                const response = await fetch(`http://127.0.0.1:5000/api/teams/${team.team_id}/players`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -55,7 +55,7 @@ function OptimizedPage() {
 
     const fetchImportance = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/api/teams/${team.team_id}/importance`, {
+            const response = await fetch(`http://127.0.0.1:5000/api/teams/${team.team_id}/importance`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -75,7 +75,7 @@ function OptimizedPage() {
 
     const getLineup = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/api/teams/${team.team_id}/lineup`, {
+            const response = await fetch(`http://127.0.0.1:5000/api/teams/${team.team_id}/lineup`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ players, importance }),

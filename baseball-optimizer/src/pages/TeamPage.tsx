@@ -88,7 +88,7 @@ function TeamPage() {
 
     const fetchPlayers = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/api/teams/${team.team_id}/players`, {
+            const response = await fetch(`http://127.0.0.1:5000/api/teams/${team.team_id}/players`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -105,7 +105,7 @@ function TeamPage() {
     
     const fetchImportance = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/api/teams/${team.team_id}/importance`, {
+            const response = await fetch(`http://127.0.0.1:5000/api/teams/${team.team_id}/importance`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -125,7 +125,7 @@ function TeamPage() {
 
     const updateImportance = async (newImportance: Importance) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/teams/${team.team_id}/importance`, {
+            const response = await fetch(`http://127.0.0.1:5000/api/teams/${team.team_id}/importance`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
