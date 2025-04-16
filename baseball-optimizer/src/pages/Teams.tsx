@@ -92,7 +92,7 @@ const Teams = () => {
 
        <div className="flex justify-center items-center w-full mt-10 select-none">
         <h1 className='mr-3 font-[500]'>Add Team:</h1>
-        <TextField className="outline-1 font-[500] rounded-lg" size="small" onChange={handleNameChange} value={teamName} label="Team Name" variant="outlined"/>
+        <TextField className="font-[500] rounded-lg" size="small" onChange={handleNameChange} value={teamName} label="Team Name" variant="outlined"/>
         <DatePicker setYear={setYear}/>
         <DivisionSelect setDivision={setDivision}/>
         {/* <Button variant="contained" onClick={addTeam}>Add Team</Button> */}

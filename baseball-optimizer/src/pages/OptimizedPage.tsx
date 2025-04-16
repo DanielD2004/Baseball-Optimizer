@@ -97,6 +97,7 @@ function OptimizedPage() {
 
     useEffect(() => {
         if (players && importance) {
+            console.log("Players and importance are set, getting lineup")
             getLineup();
         }
     }, [players, importance]);
@@ -105,12 +106,12 @@ return (
     <div>
         <h1>Optimized Lineup</h1>
         {result && (
-            <div className="scheduleHolder">
+            <div className="w-screen bg-amber-50" >
                 <h2 className="schedule">Schedule</h2>
                 {Object.entries(result.schedule).map(([inning, inningData]) => (
-                    <div key={inning}>
-                        <h3 className="inningNumber">Inning {inning}</h3>
-                        <h1 className="field">Field:</h1>
+                    <div className="w-screen bg-amber-50" key={inning}>
+                        <h3 >Inning {inning}</h3>
+                        <h1 className="font-bold text-xl">Field:</h1>
                         <div className="playerList">
                             {inningData.field.map((player) => (
                                 <h5 key={player.id} className="player-item">
@@ -118,12 +119,13 @@ return (
                                 </h5>
                             ))}
                         </div>
-                        <h1 className="bench">Bench:</h1>
+                        <h1 className="font-bold text-xl">Bench:</h1>
                         <ul className="playerList">
                             {inningData.bench.map((player) => (
                                 <h5 key={player.id} className="player-item">{player.name}</h5>
                             ))}
                         </ul>
+                        <hr className="my-3"/>
                     </div>
                 ))}
             </div>
