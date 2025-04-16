@@ -51,9 +51,9 @@ function App() {
         <SignedIn>
           <Header/>
           <Routes>
-            <Route path="/" element={<Teams/>}/>
-            <Route path='/teams/:teamName/:season' element={<TeamPage/>}/>
-            <Route path='/teams/:teamName/:season/optimized' element={<OptimizedPage/>}/>
+              <Route path="/"element={<Teams/>}/>
+              <Route path='/teams/:teamName/:season' element={<TeamPage/>}/>
+              <Route path='/teams/:teamName/:season/optimized' element={<OptimizedPage/>}/>
           </Routes>
         </SignedIn>
     </BrowserRouter>

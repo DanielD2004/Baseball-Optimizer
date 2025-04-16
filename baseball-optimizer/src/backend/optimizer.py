@@ -31,14 +31,16 @@ except Exception as e:
 def optimize_softball_lineup(team_data):
     """
     Optimize defensive lineup for a slowpitch softball team using linear programming.
+    Creates fair schedule ensuring balanced play time and respecting position preferences.
 
     Args:
-        team_data (dict): Dictionary containing player and position data
+        team_data (dict): Dictionary containing player data, position preferences, and position importance
 
     Returns:
         dict: Optimized schedule and objective value if found, or error message
     """
     app.logger.debug(f"Team data received: {team_data}")
+    
     # Extract players and position importance
     try:
         players = team_data.get("players", [])
@@ -68,27 +70,41 @@ def optimize_softball_lineup(team_data):
     positions = ["P", "C", "1B", "2B", "3B", "SS", "LF", "LC", "RC", "RF"]
     innings = list(range(1, 10))
     num_innings = len(innings)
+    num_players = len(players)
 
+    # Create the linear programming problem (maximize objective)
     prob = pl.LpProblem("Softball_Lineup_Optimization", pl.LpMaximize)
 
+    # DECISION VARIABLES
+    # x[player_id, inning, position] = 1 if player plays position in inning, 0 otherwise
     x = {(p["id"], i, pos): pl.LpVariable(f"x_{p['id']}_{i}_{pos}", cat=pl.LpBinary)
          for p in players for i in innings for pos in positions}
 
+    # sit[player_id, inning] = 1 if player sits in inning, 0 otherwise
     sit = {(p["id"], i): pl.LpVariable(f"sit_{p['id']}_{i}", cat=pl.LpBinary)
            for p in players for i in innings}
 
+    # total_sits[player_id] = total number of innings player sits
     total_sits = {p["id"]: pl.LpVariable(f"total_sits_{p['id']}", cat=pl.LpInteger, lowBound=0, upBound=num_innings)
                   for p in players}
+    
+    # cumulative_sits[player_id, inning] = number of times player has sat by end of inning i
+    cumulative_sits = {(p["id"], i): pl.LpVariable(f"cum_sits_{p['id']}_{i}", cat=pl.LpInteger, lowBound=0, upBound=i)
+                      for p in players for i in innings}
+                      
+    # v[player_id, inning] = 1 if player has sat at least twice by the end of inning i
+    v = {(p["id"], i): pl.LpVariable(f"v_{p['id']}_{i}", cat=pl.LpBinary)
+        for p in players for i in innings}
 
+    # OBJECTIVE FUNCTION: Maximize skill-position fit and player preferences
     obj_terms = []
-
     for p in players:
         player_id = p["id"]
         skill = p.get("skill", 0)
 
         for i in innings:
             for pos in positions:
-                coef = 0  # Initialize coef to 0
+                coef = 0  # Initialize coefficient to 0
                 pos_importance = position_importance.get(pos, 1)
 
                 positions_data = p.get("positions", {})
@@ -106,6 +122,7 @@ def optimize_softball_lineup(team_data):
                 else:
                     preference_lower = "cannot play"  # Default if it's not a string
 
+                # Assign coefficient based on player preferences
                 if preference_lower == "wants to play":
                     coef = 5 * skill + 5 * pos_importance  # strongly reward
                 elif preference_lower == "can play":
@@ -113,45 +130,95 @@ def optimize_softball_lineup(team_data):
                 elif preference_lower == "cannot play":
                     coef = -1000  # heavy penalty (also constrained below)
 
-                # Add term only if coef is not negative
+                # Add term to objective function
                 obj_terms.append(coef * x[(player_id, i, pos)])
 
-    prob += pl.lpSum(obj_terms)
+    # Set the objective function
+    prob += pl.lpSum(obj_terms), "Maximize_Player_Position_Fit"
 
+    # CONSTRAINT 1: Each player must be either playing a position or sitting in each inning
     for p in players:
         for i in innings:
-            prob += pl.lpSum(x[(p["id"], i, pos)] for pos in positions) + sit[(p["id"], i)] == 1
+            prob += (pl.lpSum(x[(p["id"], i, pos)] for pos in positions) + sit[(p["id"], i)] == 1,
+                    f"One_Position_Or_Sit_{p['id']}_{i}")
 
+    # CONSTRAINT 2: Each position must be filled by exactly one player in each inning
     for i in innings:
         for pos in positions:
-            prob += pl.lpSum(x[(p["id"], i, pos)] for p in players) == 1
+            prob += (pl.lpSum(x[(p["id"], i, pos)] for p in players) == 1,
+                    f"Position_Filled_{pos}_{i}")
 
+    # CONSTRAINT 3: Track total sits for each player across all innings
     for p in players:
-        prob += total_sits[p["id"]] == pl.lpSum(sit[(p["id"], i)] for i in innings)
+        prob += (total_sits[p["id"]] == pl.lpSum(sit[(p["id"], i)] for i in innings),
+                f"Count_Total_Sits_{p['id']}")
 
+    # CONSTRAINT 4: Maximum difference of 1 sit between any two players (fairness)
     max_sit_diff = 1
     for p1 in players:
         for p2 in players:
             if p1["id"] != p2["id"]:
-                prob += total_sits[p1["id"]] - total_sits[p2["id"]] <= max_sit_diff
+                prob += (total_sits[p1["id"]] - total_sits[p2["id"]] <= max_sit_diff,
+                        f"Fair_Sits_{p1['id']}_{p2['id']}")
 
+    # CONSTRAINT 5: Players cannot sit in consecutive innings
     for p in players:
         for i in range(1, num_innings):
-            prob += sit[(p["id"], i)] + sit[(p["id"], i + 1)] <= 1
+            prob += (sit[(p["id"], i)] + sit[(p["id"], i + 1)] <= 1,
+                    f"No_Consecutive_Sits_{p['id']}_{i}")
 
-    num_players = len(players)
+    # CONSTRAINT 6: Exactly 10 players on field each inning (others sit)
     for i in innings:
-        prob += pl.lpSum(sit[(p["id"], i)] for p in players) == num_players - 10
+        prob += (pl.lpSum(sit[(p["id"], i)] for p in players) == num_players - 10,
+                f"Ten_Players_On_Field_{i}")
 
-    # Co-ed rule: at least 2 women not catching
+    # CONSTRAINT 7: Track cumulative sits for each player at each inning
+    for p in players:
+        # First inning cumulative sits equals if they sit in inning 1
+        prob += (cumulative_sits[(p["id"], 1)] == sit[(p["id"], 1)], 
+                f"Cumulative_Sits_Init_{p['id']}")
+        
+        # For subsequent innings, cumulative sits = previous cumulative + current sit
+        for i in range(2, num_innings + 1):
+            prob += (cumulative_sits[(p["id"], i)] == cumulative_sits[(p["id"], i-1)] + sit[(p["id"], i)],
+                    f"Cumulative_Sits_Update_{p['id']}_{i}")
+
+    # CONSTRAINT 8: Track when a player has sat at least twice by each inning
+    for p in players:
+        for i in innings:
+            # v[p, i] = 1 if cumulative_sits[p, i] >= 2, else 0
+            # If v is 1, then cumulative sits must be at least 2
+            prob += (2 * v[(p["id"], i)] <= cumulative_sits[(p["id"], i)],
+                    f"Track_AtLeastTwoSits_Min_{p['id']}_{i}")
+            
+            # If cumulative sits are at least 2, then v must be 1
+            # Using Big-M: cumulative_sits <= 1 + M*v where M is a large number
+            M = num_innings  # Big-M value
+            prob += (cumulative_sits[(p["id"], i)] - 1 <= M * v[(p["id"], i)],
+                    f"Track_AtLeastTwoSits_Max_{p['id']}_{i}")
+
+    # CONSTRAINT 9: Ensure fair rotation - no player can sit twice before everyone sits once
     for i in innings:
-        women_not_catching = pl.lpSum(x[(p["id"], i, pos)]
-                                      for p in players
-                                      for pos in positions
-                                      if p.get("gender") == "F" and pos != "C")
-        prob += women_not_catching >= 2
+        for p1 in players:
+            for p2 in players:
+                if p1["id"] != p2["id"]:
+                    # If p1 has sat at least twice by inning i, then p2 must have sat at least once by inning i
+                    prob += (cumulative_sits[(p2["id"], i)] >= v[(p1["id"], i)],
+                            f"Fair_Rotation_{p1['id']}_{p2['id']}_{i}")
 
-    # Respect player position preferences
+    # CO-ED RULE: Handle women players if present (conditional constraint)
+    women_count = sum(1 for p in players if p.get("gender") == "F")
+    if women_count >= 2:
+        for i in innings:
+            women_not_catching = pl.lpSum(x[(p["id"], i, pos)]
+                                        for p in players
+                                        for pos in positions
+                                        if p.get("gender") == "F" and pos != "C")
+            prob += (women_not_catching >= 2,
+                    f"Two_Women_Not_Catching_{i}")
+    # If fewer than 2 women, skip this constraint
+
+    # CONSTRAINT 10: Respect player position restrictions ("Cannot Play")
     for p in players:
         for i in innings:
             for pos in positions:
@@ -162,8 +229,10 @@ def optimize_softball_lineup(team_data):
                     preference = preference.get("label", "Cannot Play")
 
                 if preference and isinstance(preference, str) and preference.lower() == "cannot play":
-                    prob += x[(p["id"], i, pos)] == 0
+                    prob += (x[(p["id"], i, pos)] == 0,
+                            f"Cannot_Play_{p['id']}_{i}_{pos}")
 
+    # Solve the linear programming problem
     try:
         prob.solve(pl.PULP_CBC_CMD(msg=False))
     except Exception as e:
@@ -171,6 +240,7 @@ def optimize_softball_lineup(team_data):
         app.logger.error(err_msg)
         return {"success": False, "message": err_msg}
 
+    # Check if solution is optimal
     if prob.status != pl.LpStatusOptimal:
         status_msg = pl.LpStatus[prob.status]
         err_msg = f"No optimal solution found. Status: {status_msg}"
@@ -180,6 +250,7 @@ def optimize_softball_lineup(team_data):
             "message": err_msg
         }
 
+    # Create schedule from solution
     schedule = {}
     for i in innings:
         schedule[i] = {
@@ -189,6 +260,7 @@ def optimize_softball_lineup(team_data):
 
         for p in players:
             player_id = p["id"]
+            # Record players on field with their positions
             for pos in positions:
                 if pl.value(x[(player_id, i, pos)]) > 0.5:
                     schedule[i]["field"].append({
@@ -198,20 +270,27 @@ def optimize_softball_lineup(team_data):
                         "skill": p.get("skill", 0),
                         "gender": p.get("gender", "")
                     })
-
+            # Record players on bench
             if pl.value(sit[(player_id, i)]) > 0.5:
                 schedule[i]["bench"].append({
                     "id": player_id,
                     "name": p["player_name"]
                 })
 
+    # Count total sits per player for reporting
     player_sits = {p["player_name"]: sum(pl.value(sit[(p["id"], i)]) for i in innings) for p in players}
+
+    # Provide detailed info about sitting pattern
+    sit_pattern = {}
+    for p in players:
+        sit_pattern[p["player_name"]] = [i for i in innings if pl.value(sit[(p["id"], i)]) > 0.5]
 
     return {
         "success": True,
         "schedule": schedule,
         "objective_value": float(pl.value(prob.objective)),
-        "player_sits": player_sits
+        "player_sits": player_sits,
+        "sit_pattern": sit_pattern  # Added to help verify sits are properly distributed
     }
 
 @app.route('/')

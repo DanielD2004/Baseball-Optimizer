@@ -131,6 +131,7 @@ function TeamPage() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
+                    user_id: user.id,
                     importance: newImportance,
                 }),
             });
@@ -163,6 +164,10 @@ function TeamPage() {
     useEffect(()=>{
         fetchImportance();
     }, [])
+
+    useEffect(()=>{
+        console.log("Importance changed")
+    }, [importance])
 
     return (
         <div>
