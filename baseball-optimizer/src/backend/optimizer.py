@@ -14,7 +14,7 @@ import os
 import requests
 
 config = dotenv_values(".env")
-app = Flask(__name__, static_folder='../client/build', static_url_path='/')
+app = Flask(__name__)
 CORS(app, origins=["http://localhost:5173", "https://baseball-optimizer.vercel.app"])
 uri = config.get("MONGO_URI")
 client = MongoClient(uri, server_api=ServerApi('1'))
