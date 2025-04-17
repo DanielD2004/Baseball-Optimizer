@@ -28,7 +28,7 @@ function App() {
         },
         body: JSON.stringify(data)
       });
-      const result = await response.json();
+      await response.json();
       } catch (error) {
           console.error('Error fetching teams:', error);
       }
