@@ -25,7 +25,7 @@ const DivisionSelect: React.FC<DivisionSelectProps> = ({ setDivision }) => {
 					<RadioGroup.Item className="RadioGroupItem" value="Mixed" id="r1">
 						<RadioGroup.Indicator className="RadioGroupIndicator" />
 					</RadioGroup.Item>
-					<label className="ml-2 font-[450] tracking-wide text-violet-700" htmlFor="r1">
+					<label className="ml-2 font-[450] tracking-wide text-sky-500 text-md uppercase tracking-wide font-semibold" htmlFor="r1">
 						Mixed
 					</label>
 				</div>
@@ -33,7 +33,7 @@ const DivisionSelect: React.FC<DivisionSelectProps> = ({ setDivision }) => {
 					<RadioGroup.Item className="RadioGroupItem" value="Mens" id="r2">
 						<RadioGroup.Indicator className="RadioGroupIndicator" />
 					</RadioGroup.Item>
-					<label className="ml-2 font-[450] tracking-wide text-violet-700" htmlFor="r2">
+					<label className="ml-2 font-[450] tracking-wide text-sky-500 text-md uppercase tracking-wide font-semibold" htmlFor="r2">
 						Mens
 					</label>
 				</div>
@@ -41,7 +41,7 @@ const DivisionSelect: React.FC<DivisionSelectProps> = ({ setDivision }) => {
 					<RadioGroup.Item className="RadioGroupItem" value="Masters" id="r3">
 						<RadioGroup.Indicator className="RadioGroupIndicator" />
 					</RadioGroup.Item>
-					<label className="ml-2 font-[450] tracking-wide text-violet-700" htmlFor="r3">
+					<label className="ml-2 font-[450] tracking-wide text-sky-500 text-md uppercase tracking-wide font-semibold" htmlFor="r3">
 						Masters
 					</label>
 				</div>
@@ -49,7 +49,7 @@ const DivisionSelect: React.FC<DivisionSelectProps> = ({ setDivision }) => {
 					<RadioGroup.Item className="RadioGroupItem" value="Ladies" id="r4">
 						<RadioGroup.Indicator className="RadioGroupIndicator" />
 					</RadioGroup.Item>
-					<label className="ml-2 font-[450] tracking-wide text-violet-700" htmlFor="r4">
+					<label className="ml-2 font-[450] tracking-wide text-sky-500 text-md uppercase tracking-wide font-semibold" htmlFor="r4">
 						Ladies
 					</label>
 				</div>

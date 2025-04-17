@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import Rating from '@mui/material/Rating';
 import Box from '@mui/material/Box';
 import StarIcon from '@mui/icons-material/Star';
-import { ValueNoneIcon } from '@radix-ui/react-icons';
 
 function getLabelText(value: number) {
   return `${value} Star${value !== 1 ? 's' : ''}, ${value}`;

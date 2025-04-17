@@ -15,7 +15,7 @@ createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
       <Theme>
-        <div className="h-screen w-screen bg-amber-50">
+        <div className="h-screen w-screen bg-cyan-50 dark:bg-neutral-700">
           <App/>
         </div>
       </Theme>

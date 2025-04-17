@@ -4,6 +4,7 @@ import { useUser } from '@clerk/clerk-react';
 import { InputLabel, TextField } from '@mui/material';
 import DivisionSelect from '../components/DivisionSelect';
 import DatePicker from '../components/DatePicker';
+import TeamCard from '../components/TeamCard';
 
 interface Team {
   team_id: number;
@@ -59,45 +60,38 @@ const Teams = () => {
   }
 
   useEffect(() => {
-    console.log(teams)
     if (user) {
       fetchTeams(user.id);
     } else {
       console.log("User error")
     }
-  }, [user, division]);
+  }, [user]);
 
   return (
     <div id="teams">
-      <h1 id="my-teams-header" className="text-slate-600 uppercase text-7xl font-bold font-mono text-center tracking-wide">My Teams</h1>
-      <hr className='border-1'/>
+      <h1 id="my-teams-header" className="dark:text-white -mt-17 mb-1 text-slate-600 uppercase text-7xl font-bold font-mono text-center tracking-wide text-shadow-slate-300 text-shadow-lg dark:text-shadow-2xl dark:text-shadow-black">My Teams</h1>
+      <hr className='border-1 mb-4'/>
       {teams.length > 0 ? (
-        <div>
-          {teams.map((team: Team) => (
-            <div key={team.team_id} className='border-l-2 border-r-2 border-b-2 border-dashed border-black w-1/6 p-5 mx-auto' >
-              <h2 className='mt-4 mb-4 font-bold text-2xl text-sky-500'>
-                <Link to={`/teams/${team.team_name}/${team.season}`} state={team} className='hover:text-blue-600 p-2 rounded-2xl border-3 border-gray-400 bg-gray-100 hover:bg-gray-200 hover:border-gray-500'>{team.team_name}</Link>  
-              </h2>
-              <div className='font-mono font-[550] text-lg tracking-wide'>
-                <span>{team.season} {team.division} division</span>
-                <br/>
-              </div>
-              {/* <hr className="border-1 border-black w-1/4 mx-auto" /> */}
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p>No teams found for this user.</p>
-      )}
+          // y space between children
+          <div className="space-y-6 flex min-w-1/2 max-w-100 mx-auto flex-wrap">
+            {teams.map((team) => (
+              <TeamCard key={team.team_id} team={team} />
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-gray-500 mt-6">No teams found for this user.</p>
+        )}
 
-       <div className="flex justify-center items-center w-full mt-10 select-none">
-        <h1 className='mr-3 font-[500]'>Add Team:</h1>
-        <TextField className="font-[500] rounded-lg" size="small" onChange={handleNameChange} value={teamName} label="Team Name" variant="outlined"/>
-        <DatePicker setYear={setYear}/>
+       {/* better to not have increase scale on hover, year select brings it out of hover */}
+       <div className="hover:bg-zinc-50 dark:bg-slate-800 py-3 transition-discrete duration-100 bg-white shadow-md shadow-slate-500 rounded-2xl flex relative justify-center items-center max-w-1/5 flex-wrap w-100 mx-auto mt-10 select-none space-y-15">
+        <h1 className='dark:text-amber-500 absolute top-0 left-5 font-[500] mt-3'>Add Team:</h1>
+        <div className='flex flex-col mt-8 mr-5 items-start mb-20'>
+          <TextField className="font-[500] rounded-lg" size="small" /* sx={{input: {color: 'white'}, label: {color: 'white'}, border: {color: 'white'}}}*/ onChange={handleNameChange} value={teamName} label="Team Name" variant="outlined"/>
+          <DatePicker setYear={setYear}/>
+        </div>
         <DivisionSelect setDivision={setDivision}/>
-        {/* <Button variant="contained" onClick={addTeam}>Add Team</Button> */}
-        <div className='ml-3 border-2 border-slate-400 bg-slate-100 hover:bg-gray-200 rounded-lg p-2 w-fit h-10 flex justify-center items-center cursor-pointer select-none'>
-          <button onClick={addTeam}>Add Team</button>
+        <div onClick={addTeam} className='-mt-10 transition transition-duration-300 border-2 border-slate-400 bg-slate-100 hover:bg-gray-200 rounded-lg p-2 w-fit h-10 flex justify-center items-center cursor-pointer select-none'>
+          Add Team
         </div>
       </div>
     </div>

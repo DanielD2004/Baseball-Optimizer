@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { Ring } from 'ldrs/react'
+import 'ldrs/react/Ring.css'
 
 interface Team {
     team_id: string;
@@ -29,6 +31,7 @@ interface Player {
 }
 
 function OptimizedPage() {
+    const [loading, setLoading] = useState<boolean>(true);
     const [result, setResult] = useState<Schedule | null>(null);
     const [players, setPlayers] = useState();
     const [importance, setImportance] = useState();
@@ -84,6 +87,7 @@ function OptimizedPage() {
             const data = await response.json();
             console.log(data);
             setResult(data);
+            setLoading(false);
         } catch (err) {
             console.error(err);
             setResult(null);
@@ -103,13 +107,18 @@ function OptimizedPage() {
     }, [players, importance]);
 
 return (
-    <div>
+    <div className='bg-cyan-50'>
         <h1>Optimized Lineup</h1>
-        {result && (
-            <div className="w-screen bg-amber-50" >
+        {loading == true ? (
+            <div className="h-screen -mt-20 flex flex-col justify-center items-center" >
+                <Ring size="75"></Ring>
+                <div className='mt-5'>This may take a few moments</div>
+            </div>
+        ) : (
+            <div className="w-screen" >
                 <h2 className="schedule">Schedule</h2>
                 {Object.entries(result.schedule).map(([inning, inningData]) => (
-                    <div className="w-screen bg-amber-50" key={inning}>
+                    <div className="w-screen" key={inning}>
                         <h3 >Inning {inning}</h3>
                         <h1 className="font-bold text-xl">Field:</h1>
                         <div className="playerList">

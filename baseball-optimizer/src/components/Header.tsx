@@ -8,7 +8,7 @@ function Header() {
   const { pathname } = location;
   return (
     <div id="header" className='flex justify-between items-center'>
-      <div id="user-button" className='ml-10 mt-5'>
+      <div id="user-button" className='ml-10 mt-3'>
           <UserButton
               appearance={{
                   elements: {
@@ -22,8 +22,8 @@ function Header() {
           />
       </div>
       {pathname !== '/' && 
-        <div className="border-2 mr-15 border-slate-400 bg-slate-100 hover:bg-gray-200 rounded-lg w-fit h-fit p-1 flex justify-center items-center cursor-pointer select-none text-lg">
-          <button onClick={() => navigate(-1)}>Back</button>
+        <div onClick={() => navigate(-1)} className="border-2 mr-15 border-slate-400 bg-slate-100 hover:bg-gray-200 rounded-lg w-fit h-fit px-1 flex justify-center items-center cursor-pointer select-none text-lg">
+          Back
         </div>
       }
     </div>

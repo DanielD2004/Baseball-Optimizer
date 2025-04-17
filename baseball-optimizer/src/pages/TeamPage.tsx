@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
-import './TeamPage.css';
 import AddPlayer from '../components/AddPlayer';
 import ImportanceModal from '../components/ImportanceModal';
 
@@ -170,19 +169,17 @@ function TeamPage() {
     }, [importance])
 
     return (
-        <div>
+        <div className='bg-cyan-50'>
             {team ? (
                 <>
                     <div className="team-bio">
-                        <h1>{team.division}</h1>
-                        <h2>
+                        <h1 className="dark:text-white -mt-17 mb-1 text-slate-600 uppercase text-7xl font-bold font-mono text-center tracking-wide text-shadow-slate-300 text-shadow-lg dark:text-shadow-2xl dark:text-shadow-black">
                             <Link to={`/teams/${team.team_name}/${team.season}/optimized`} state={team}>{team.team_name}</Link>  
-                        </h2>
-                        <h1>{team.season}</h1>
+                        </h1>
                     </div>
+                    <hr className='border-1 mb-4'/>
                     {players.length > 0 && (
                         <>
-                            <h2>Players:</h2>
                             <div style={{
                                 display: "flex",
                                 flexWrap: "wrap",
@@ -206,12 +203,13 @@ function TeamPage() {
                         </>
                     )}
                     <br />
-                    <AddPlayer key={players.length} updatePlayers={fetchPlayers} player={defaultPlayer} />
+                    
                 </>
             ) : (
                 <h2>No data</h2>
             )}
-            <div style={{ position: "absolute", bottom: "50vh", margin: "20px", right: 50, width: "150px", height: "150px" }}>
+            <div className='absolute right-0 bottom-1/2 flex flex-col gap-2'>
+                <AddPlayer key={players.length} updatePlayers={fetchPlayers} player={defaultPlayer} />
                 <ImportanceModal updateImportance={updateImportance} initialImportance={importance} />
             </div>
         </div>

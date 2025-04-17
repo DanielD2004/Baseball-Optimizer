@@ -155,27 +155,28 @@ const AddPlayer = ({updatePlayers, player}: AddPlayerProps) => {
 					<label className="Label" htmlFor="name">
 						Name
 					</label>
-					<TextField style={{marginLeft: "10px"}} size="small" onChange={handleNameChange} value={name} label={player.default ? "Add Player" : player.player_name} variant="outlined"/>
+					<TextField size="small" onChange={handleNameChange} value={name} label={player.default ? "Add Player" : player.player_name} variant="outlined"/>
 					<label className="Label" htmlFor="gender">Male:</label>
 					<Switch.Root onCheckedChange={handleGenderChange} defaultChecked={player.gender !== "Male"} className="SwitchRoot" id="gender-switch" >
 						<Switch.Thumb className="SwitchThumb" />
 					</Switch.Root>
-					<label style={{marginLeft: "-10%"}} className="Label" htmlFor="gender">Female</label>
+					<label className="Label" htmlFor="gender">Female</label>
 				</fieldset>
 
 				<fieldset className="Fieldset">
-					<label style={{marginLeft: "-8%"}} className="Label" htmlFor="rating">
+					<div className="flex justify-center items-center align-center mx-auto">
+					<label className="Label mr-3" htmlFor="rating">
 						Rating
 					</label>
-					<PlayerRating initialValue={player.default ? 2.5 : player.skill} onRatingChange={handleRatingChange}/>
+						<PlayerRating initialValue={player.default ? 2.5 : player.skill} onRatingChange={handleRatingChange}/>
+					</div>
 				</fieldset>
 				
-				<div>
-				<div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
+				<div className="space-y-3">
 					{/* if theres a player, show their preferences, else show initial options */}
 					{Object.entries(player.positions).map(([key, {label} ]) => ( 
-					<div key={key} style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "20px" }}>
-						<h2>{key}</h2>
+					<div key={key} className="flex flex-row items-center justify-center align-center gap-8">
+						<h2 className="w-4">{key}</h2>
 						<Select
 							options={positionOptions}
 							id={key}
@@ -183,7 +184,7 @@ const AddPlayer = ({updatePlayers, player}: AddPlayerProps) => {
 							styles={{
 								control: (baseStyles, state) => ({
 									...baseStyles,
-									width: 300,
+									minWidth: 300,
 									borderRadius: state.isFocused ? "50px" : "0px",
 								}),
 							}}
@@ -192,13 +193,10 @@ const AddPlayer = ({updatePlayers, player}: AddPlayerProps) => {
 					</div>
 					))}
 				</div>
-				<div
-					style={{ display: "flex", marginTop: 25, justifyContent: "flex-end" }}
-				>
+				<div>
 					<Dialog.Close asChild>
-						<button onClick={checkSubmit} className="Button green">{player.default ? "Add Player" : "Update Player"}</button>
+						<div onClick={checkSubmit} className="bg-cyan-200 w-fit mx-auto p-2 rounded-lg mt-5 hover:bg-cyan-300 transition transition-duration-300 select-none shadow-gray-600 shadow-sm">{player.default ? "Add Player" : "Update Player"}</div>
 					</Dialog.Close>
-				</div>
 				</div>
 				<Dialog.Close asChild>
 					<button className="IconButton" aria-label="Close">
