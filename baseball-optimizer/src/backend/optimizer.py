@@ -14,8 +14,8 @@ import os
 import requests
 
 config = dotenv_values(".env")
-app = Flask(__name__)
-CORS(app, origins="http://localhost:5173")
+app = Flask(__name__, static_folder='../client/build', static_url_path='/')
+CORS(app, origins=["http://localhost:5173", "https://baseball-optimizer.vercel.app"])
 uri = config.get("MONGO_URI")
 client = MongoClient(uri, server_api=ServerApi('1'))
 db = client["Optimizer"]
@@ -296,6 +296,8 @@ def index():
     return """
     <h1>Yo</h1>
     """
+def serve():
+    return send_from_directory(app.static_folder, 'index.html')
 
 # Get all teams for a user
 @app.route("/api/teams/<user_id>", methods=["GET"])
@@ -476,3 +478,4 @@ def ping():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
+

@@ -21,7 +21,7 @@ function App() {
           "full_name": user.fullName, 
           "email": user.emailAddresses[0].emailAddress,
         }
-        const response = await fetch(`http://127.0.0.1:5000/api/users`, {
+        const response = await fetch(`/api/users`, {
         method: 'POST',
         headers: {
         'Content-Type': 'application/json',
