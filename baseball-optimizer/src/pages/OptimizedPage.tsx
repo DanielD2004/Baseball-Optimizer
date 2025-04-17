@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import { Ring } from 'ldrs/react'
 import 'ldrs/react/Ring.css'
@@ -21,8 +21,8 @@ interface Team {
 
 interface Schedule {
     objective_value: number;
-    schedule: { [inning: number]: Inning };
     player_sits: { [playerName: string]: number };
+    schedule: { [inning: number]: Inning };
 }
 
 interface Inning {
@@ -41,12 +41,13 @@ interface Player {
 interface schedulePlayer {
     id: string;
     name: string;
-}
+    position?: string;
+} 
+
 function OptimizedPage() {
-    const [playerPostions, setPlayerPositions] = useState()
     const innings: string[] = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
     const [loading, setLoading] = useState<boolean>(true);
-    const [result, setResult] = useState<Schedule | null>(null);
+    const [result, setResult] = useState<{ [playerName: string]: string[] } | null>(null);
     const [players, setPlayers] = useState();
     const [importance, setImportance] = useState();
     const location = useLocation();
@@ -101,7 +102,7 @@ function OptimizedPage() {
             });
     
             const data = await response.json();
-            setPlayerPositions(getPlayerPositionsByInning(data));
+            setResult(getPlayerPositionsByInning(data));
             setLoading(false);
         } catch (err) {
             console.error(err);
@@ -134,8 +135,8 @@ function OptimizedPage() {
         }
     }, [players, importance]);
     
-    function getPlayerPositionsByInning(schedule) {
-        const playerPositionsByInning = {};
+    function getPlayerPositionsByInning(schedule: Schedule) {
+        const playerPositionsByInning: { [playerName: string]: string[] } = {};
         const innings = 9;
         
         // init all players with arrays of 'X'
@@ -163,10 +164,10 @@ function OptimizedPage() {
           // set field positions
           inning.field.forEach((player: schedulePlayer) => {
             // access object through player name and update position array accordingly
-            playerPositionsByInning[player.name][indexPosition] = player.position;
+            playerPositionsByInning[player.name][indexPosition] = player.position ?? "X";
           });
         }
-        
+        console.log(playerPositionsByInning)
         return playerPositionsByInning;
       }
 
@@ -193,7 +194,7 @@ function OptimizedPage() {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {Object.entries(playerPostions).map(([playerName, positions]) => (
+                                {result && Object.entries(result).map(([playerName, positions]) => (
                                     <TableRow key={playerName}>
                                         <TableCell align="center" sx={{fontWeight: 'bold'}} scope="row">{playerName}</TableCell>
                                         {positions.map((position, index) => (

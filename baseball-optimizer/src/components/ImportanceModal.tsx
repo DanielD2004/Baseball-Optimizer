@@ -1,13 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog } from "radix-ui";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { Slider } from "radix-ui";
 import "./ImportanceModal.css";
-
-interface Team {
-    team_id: string;
-    user_id: string;
-}
 
 interface Importance {
     "1B": number;
@@ -55,7 +50,6 @@ const ImportanceModal = ({ updateImportance, initialImportance }: ImportanceModa
             <Dialog.Portal>
                 <Dialog.Overlay className="DialogOverlay" />
                 <Dialog.Content className="DialogContent bg-gray-100">
-                    {/* <Dialog.Title className="font-mono tracking-tight text-left font-bold text-lg -mt-2">Edit Position Importance</Dialog.Title> */}
                     <Dialog.Description className="font-mono text-[17px] text-left text-lg">
                         Edit the importance you give to each position, this will be used to calculate the optimal defensive lineup.
                     </Dialog.Description>
@@ -65,7 +59,8 @@ const ImportanceModal = ({ updateImportance, initialImportance }: ImportanceModa
                             <div key={position} className="flex flex-row justify-center align-center gap-2 items-center">
                                 <h2 className="w-4 mr-3 text-lg font-mono font-semibold tracking-wide">{position}: </h2>
                                 <Slider.Root
-                                    value={[importance[position]]}  // Controlled value
+                                    // ts cant tell if position is one of the keys in Importance, keyof Importance works around it, tells ts that position is a key of Importance
+                                    value={[importance[position as keyof Importance]]} 
                                     onValueChange={(value) => handleValueChange(position, value[0])}
                                     className="SliderRoot"
                                     max={100}

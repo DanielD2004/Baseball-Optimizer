@@ -30,13 +30,12 @@ interface Player {
 }
 
 interface AddPlayerProps {
-	key: number;
 	updatePlayers: () => void;
 	player: Player;
 	disabled?: boolean;
 }
 
-const AddPlayer = ({key, updatePlayers, player, disabled}: AddPlayerProps) => {
+const AddPlayer = ({ updatePlayers, player, disabled}: AddPlayerProps) => {
 	const [name, setName] = useState<string>(player.player_name);
 	const [rating, setRating] = useState<number>(player.skill);
 	const [selectedPositions, setSelectedPositions] = useState<{ [key: string]: PositionOption }>(player.positions);
@@ -107,13 +106,13 @@ const AddPlayer = ({key, updatePlayers, player, disabled}: AddPlayerProps) => {
 					gender: gender
     			})
     		  });
-    		  const res = await response.json();
+    		  await response.json();
 
 			  // send emit to parent to update players
     		  updatePlayers();
     	}
 
-	const checkSubmit = (e: React.MouseEvent<MouseEvent>) => {
+	const checkSubmit = (e: React.MouseEvent<HTMLDivElement>) => {
 		if (name.trim() == "") {
 			alert("Please Fill Out All Fields");
 			e.preventDefault()
@@ -186,14 +185,17 @@ const AddPlayer = ({key, updatePlayers, player, disabled}: AddPlayerProps) => {
 							id={key}
 							defaultValue={{ label }}
 							styles={{
-								control: (baseStyles, state) => ({
+								control: (baseStyles) => ({
 									...baseStyles,
 									minWidth: 300,
 									borderRadius: "10px",
 								}),
 							}}
-							onChange={(selectedOption: PositionOption) => handleChange(selectedOption, key)}
-						/>	
+							onChange={(selectedOption) => {
+								if (selectedOption){ 
+								handleChange(selectedOption, key)
+							} 
+						}}/>	
 					</div>
 					))}
 				</div>

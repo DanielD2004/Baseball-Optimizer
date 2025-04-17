@@ -1,4 +1,3 @@
-import React, {useEffect, useState} from 'react'
 import { UserButton } from '@clerk/clerk-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 

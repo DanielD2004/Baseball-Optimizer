@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import AddPlayer from '../components/AddPlayer';
@@ -129,7 +129,7 @@ function TeamPage() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    user_id: user.id,
+                    user_id: user ? user.id : "",
                     importance: newImportance,
                 }),
             });
