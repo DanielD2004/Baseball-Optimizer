@@ -266,9 +266,7 @@ def optimize_softball_lineup(team_data):
                     schedule[i]["field"].append({
                         "id": player_id,
                         "name": p["player_name"],
-                        "position": pos,
-                        "skill": p.get("skill", 0),
-                        "gender": p.get("gender", "")
+                        "position": pos
                     })
             # Record players on bench
             if pl.value(sit[(player_id, i)]) > 0.5:

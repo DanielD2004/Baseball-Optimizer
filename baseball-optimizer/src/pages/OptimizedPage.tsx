@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
 import { Ring } from 'ldrs/react'
 import 'ldrs/react/Ring.css'
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 
 interface Team {
     team_id: string;
@@ -30,13 +38,21 @@ interface Player {
     gender: string;
 }
 
+interface schedulePlayer {
+    id: string;
+    name: string;
+}
 function OptimizedPage() {
+    const [playerPostions, setPlayerPositions] = useState()
+    const innings: string[] = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
     const [loading, setLoading] = useState<boolean>(true);
     const [result, setResult] = useState<Schedule | null>(null);
     const [players, setPlayers] = useState();
     const [importance, setImportance] = useState();
     const location = useLocation();
     const team: Team = location.state as Team;
+    const { user } = useUser();
+    const navigate = useNavigate();
 
     const fetchPlayers = async () => {
         console.log("fetching players")
@@ -85,8 +101,7 @@ function OptimizedPage() {
             });
     
             const data = await response.json();
-            console.log(data);
-            setResult(data);
+            setPlayerPositions(getPlayerPositionsByInning(data));
             setLoading(false);
         } catch (err) {
             console.error(err);
@@ -100,47 +115,101 @@ function OptimizedPage() {
     }, []);
 
     useEffect(() => {
+            if (!team || !user) {
+                navigate('/');
+                return;
+            }
+            if (user && team && team.user_id !== user.id) {
+                navigate('/');
+            }
+    
+            fetchPlayers();
+            fetchImportance();
+        }, [user, team]);
+
+    useEffect(() => {
         if (players && importance) {
             console.log("Players and importance are set, getting lineup")
             getLineup();
         }
     }, [players, importance]);
+    
+    function getPlayerPositionsByInning(schedule) {
+        const playerPositionsByInning = {};
+        const innings = 9;
+        
+        // init all players with arrays of 'X'
+        for (const inningNum in schedule.schedule) {
+          const inning = schedule.schedule[inningNum]; // inning is the object with field and bench subObjects
+          // add bench
+          inning.bench.forEach((player: schedulePlayer) => {
+            if (!playerPositionsByInning[player.name]) {
+              playerPositionsByInning[player.name] = Array(innings).fill("X");
+            }
+          });
+          // add field 
+          inning.field.forEach((player: schedulePlayer) => {
+            if (!playerPositionsByInning[player.name]) {
+              playerPositionsByInning[player.name] = Array(innings).fill("X");
+            }
+          });
+        }
+        
+        // fill in proper positions
+        for (const inningNum in schedule.schedule) {
+          const inning = schedule.schedule[inningNum];
+          const indexPosition = parseInt(inningNum) - 1; // convert to 0 index
+          
+          // set field positions
+          inning.field.forEach((player: schedulePlayer) => {
+            // access object through player name and update position array accordingly
+            playerPositionsByInning[player.name][indexPosition] = player.position;
+          });
+        }
+        
+        return playerPositionsByInning;
+      }
 
-return (
-    <div className='bg-cyan-50'>
-        <h1>Optimized Lineup</h1>
-        {loading == true ? (
-            <div className="h-screen -mt-20 flex flex-col justify-center items-center" >
-                <Ring size="75"></Ring>
-                <div className='mt-5'>This may take a few moments</div>
-            </div>
-        ) : (
-            <div className="w-screen" >
-                <h2 className="schedule">Schedule</h2>
-                {Object.entries(result.schedule).map(([inning, inningData]) => (
-                    <div className="w-screen" key={inning}>
-                        <h3 >Inning {inning}</h3>
-                        <h1 className="font-bold text-xl">Field:</h1>
-                        <div className="playerList">
-                            {inningData.field.map((player) => (
-                                <h5 key={player.id} className="player-item">
-                                    {player.name} - {player.position}
-                                </h5>
-                            ))}
-                        </div>
-                        <h1 className="font-bold text-xl">Bench:</h1>
-                        <ul className="playerList">
-                            {inningData.bench.map((player) => (
-                                <h5 key={player.id} className="player-item">{player.name}</h5>
-                            ))}
-                        </ul>
-                        <hr className="my-3"/>
-                    </div>
-                ))}
-            </div>
-            )} 
+      return (
+        <div className='bg-cyan-50'>
+            {loading ? (
+                <div className="h-screen -mt-20 flex flex-col justify-center items-center" >
+                    <Ring size="75"></Ring>
+                    <div className='mt-5'>This may take a few moments</div>
+                </div>
+            ) : (
+                <div className='w-screen mt-25 mx-auto'>
+                    <TableContainer component={Paper}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell align="center" sx={{fontWeight: 'bold'}}>Name</TableCell>
+                                    {/* fill out top row */}
+                                    {innings.map((inning) => (
+                                        <TableCell sx={{fontWeight: 'bold'}} key={inning} align="center">
+                                            Inning {inning}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {Object.entries(playerPostions).map(([playerName, positions]) => (
+                                    <TableRow key={playerName}>
+                                        <TableCell align="center" sx={{fontWeight: 'bold'}} scope="row">{playerName}</TableCell>
+                                        {positions.map((position, index) => (
+                                            <TableCell key={index} align="center" sx={{backgroundColor: position === 'X' ? '#ff999b' : '#99ffa3', fontWeight: 'bold'}}>
+                                                {position}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </div> 
+            )}
         </div>
-);
+    );
 }
 
 export default OptimizedPage

@@ -30,11 +30,13 @@ interface Player {
 }
 
 interface AddPlayerProps {
+	key: number;
 	updatePlayers: () => void;
 	player: Player;
+	disabled?: boolean;
 }
 
-const AddPlayer = ({updatePlayers, player}: AddPlayerProps) => {
+const AddPlayer = ({key, updatePlayers, player, disabled}: AddPlayerProps) => {
 	const [name, setName] = useState<string>(player.player_name);
 	const [rating, setRating] = useState<number>(player.skill);
 	const [selectedPositions, setSelectedPositions] = useState<{ [key: string]: PositionOption }>(player.positions);
@@ -141,13 +143,13 @@ const AddPlayer = ({updatePlayers, player}: AddPlayerProps) => {
     return (
 		<Dialog.Root>
 		<Dialog.Trigger asChild>
-			<button className="Button violet">{player.default ? "Add a Player" : player.player_name}</button> 
+			<div className={`rounded cursor-pointer select-none inline-flex items-center justify-center p-2 hover:bg-violet-300 transition duration-300 ${player.default ? 'border-2 h-20 w-3xs' : 'mb-1'} ${disabled ? 'bg-gray-400 text-gray-600 cursor-not-allowed pointer-events-none' : 'bg-violet-200 hover:bg-violet-300 text-gray-700'}`}> {player.default ? 'Add a Player' : player.player_name}</div>
 		</Dialog.Trigger>
 		<Dialog.Portal>
 			<Dialog.Overlay className="DialogOverlay" />
-			<Dialog.Content className="DialogContent">
-				<Dialog.Title className="DialogTitle">{player.default ? "Add Player" : "Update Player"}</Dialog.Title>
-				<Dialog.Description className="DialogDescription">
+			<Dialog.Content className="DialogContent bg-gray-100">
+				<Dialog.Title className="text-left font-extrabold ml-5 text-lg font-mono tracking-wide">{player.default ? "Add Player" : "Update Player"}</Dialog.Title>
+				<Dialog.Description className="text-left ml-5 my-2 font-mono tracking-tight">
 					{player.default ? "Add a player to your team, include their name, skill rating and position preferences" : ""}
 				</Dialog.Description>
 
@@ -155,7 +157,9 @@ const AddPlayer = ({updatePlayers, player}: AddPlayerProps) => {
 					<label className="Label" htmlFor="name">
 						Name
 					</label>
-					<TextField size="small" onChange={handleNameChange} value={name} label={player.default ? "Add Player" : player.player_name} variant="outlined"/>
+					<div className="bg-white">
+						<TextField size="small" onChange={handleNameChange} value={name} label={player.default ? "Add Player" : player.player_name} variant="outlined"/>
+					</div>
 					<label className="Label" htmlFor="gender">Male:</label>
 					<Switch.Root onCheckedChange={handleGenderChange} defaultChecked={player.gender !== "Male"} className="SwitchRoot" id="gender-switch" >
 						<Switch.Thumb className="SwitchThumb" />
@@ -175,8 +179,8 @@ const AddPlayer = ({updatePlayers, player}: AddPlayerProps) => {
 				<div className="space-y-3">
 					{/* if theres a player, show their preferences, else show initial options */}
 					{Object.entries(player.positions).map(([key, {label} ]) => ( 
-					<div key={key} className="flex flex-row items-center justify-center align-center gap-8">
-						<h2 className="w-4">{key}</h2>
+					<div key={key} className="flex flex-row items-center justify-center gap-8">
+						<h2 className="w-4 font-[550] text-xl tracking-wide ">{key}</h2>
 						<Select
 							options={positionOptions}
 							id={key}
@@ -185,7 +189,7 @@ const AddPlayer = ({updatePlayers, player}: AddPlayerProps) => {
 								control: (baseStyles, state) => ({
 									...baseStyles,
 									minWidth: 300,
-									borderRadius: state.isFocused ? "50px" : "0px",
+									borderRadius: "10px",
 								}),
 							}}
 							onChange={(selectedOption: PositionOption) => handleChange(selectedOption, key)}

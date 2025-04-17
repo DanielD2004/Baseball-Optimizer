@@ -41,6 +41,10 @@ interface Importance {
 
 function TeamPage() {
     const [players, setPlayers] = useState<Player[]>([]);
+    const { user } = useUser();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const team: Team = location.state as Team;
     const [importance, setImportance] = useState<Importance>({
         "1B": 50,
         "2B": 50,
@@ -53,11 +57,6 @@ function TeamPage() {
         "RC": 50,
         "RF": 50,
     });
-
-    const { user } = useUser();
-    const navigate = useNavigate();
-    const location = useLocation();
-    const team: Team = location.state as Team;
 
     const positionOptions: PositionOption[] = [
         { label: "Wants To Play" },
@@ -158,58 +157,50 @@ function TeamPage() {
         }
 
         fetchPlayers();
-    }, [user, team]);
-
-    useEffect(()=>{
         fetchImportance();
-    }, [])
-
-    useEffect(()=>{
-        console.log("Importance changed")
-    }, [importance])
+    }, [user, team]);
 
     return (
         <div className='bg-cyan-50'>
             {team ? (
                 <>
-                    <div className="team-bio">
-                        <h1 className="dark:text-white -mt-17 mb-1 text-slate-600 uppercase text-7xl font-bold font-mono text-center tracking-wide text-shadow-slate-300 text-shadow-lg dark:text-shadow-2xl dark:text-shadow-black">
-                            <Link to={`/teams/${team.team_name}/${team.season}/optimized`} state={team}>{team.team_name}</Link>  
-                        </h1>
+                    <div className="-mt-15">
+                        <p className=" mx-auto w-fit cursor-pointer dark:text-white mb-1 text-slate-600 uppercase text-4xl md:text-7xl font-bold font-mono text-center tracking-wide text-shadow-slate-300 text-shadow-lg dark:text-shadow-2xl dark:text-shadow-black" /* to={`/teams/${team.team_name}/${team.season}/optimized`} state={team}*/>
+                        {team.team_name} 
+                        </p> 
                     </div>
                     <hr className='border-1 mb-4'/>
-                    {players.length > 0 && (
-                        <>
-                            <div style={{
-                                display: "flex",
-                                flexWrap: "wrap",
-                                justifyContent: "center",
-                                gap: "20px",
-                                maxWidth: "800px",
-                                margin: "0 auto"
-                            }}>
-                                {players.map((player) => (
-                                    <div style={{ minWidth: "150px", textAlign: "center", borderRight: "1px solid black", borderLeft: "1px solid black" }} key={player.player_name} >
-                                        <AddPlayer updatePlayers={fetchPlayers} player={player} />
-                                        {player.positions && Object.entries(player.positions).map(([position, data]) => (
-                                            <div key={position}>
-                                                <strong>{position}:</strong> {data.label}
-                                            </div>
-                                        ))}
-                                        <br /><br />
-                                    </div>
-                                ))}
+                    {players.length > 0 ? (
+                                <div className="col-span-full flex flex-wrap justify-center gap-4 w-2/3 mx-auto my-auto">
+                                    {players.map((player) => (
+                                        //player card
+                                        <div className="dark:bg-slate-800 hover:bg-zinc-50 hover:scale-105 transition-discrete duration-100 bg-white px-5 h-80 shadow-md shadow-slate-500 rounded-2xl pt-5" key={player.player_name} >
+                                            <AddPlayer updatePlayers={fetchPlayers} player={player} />
+                                            {player.positions && Object.entries(player.positions).map(([position, data]) => (
+                                                <div key={position}>
+                                                    <strong>{position}:</strong> {data.label}
+                                                </div>
+                                            ))}
+                                            <br /><br />
+                                        </div>
+                                    ))}
                             </div>
-                        </>
-                    )}
+                    ): 
+                    <div className='font-mono font-black text-5xl mt-70'>No Players On This Team Yet</div>
+                    }
                     <br />
                     
                 </>
             ) : (
                 <h2>No data</h2>
             )}
-            <div className='absolute right-0 bottom-1/2 flex flex-col gap-2'>
-                <AddPlayer key={players.length} updatePlayers={fetchPlayers} player={defaultPlayer} />
+            <div className='sticky flex flex-col gap-4 items-center pb-20 md:flex-row md:justify-center'>
+                <AddPlayer disabled={players.length >= 15} key={players.length} updatePlayers={fetchPlayers} player={defaultPlayer} />
+                <Link to={`/teams/${team.team_name}/${team.season}/optimized`} state={team}>
+                    <div className="w-3xs bg-violet-300 border-2 rounded-md justify-center px-2 py-1 inline-flex h-20 select-none cursor-pointer items-center hover:bg-violet-300 transition duration-300">
+                        Generate Lineup
+                    </div>
+                </Link>
                 <ImportanceModal updateImportance={updateImportance} initialImportance={importance} />
             </div>
         </div>

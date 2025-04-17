@@ -44,26 +44,26 @@ const ImportanceModal = ({ updateImportance, initialImportance }: ImportanceModa
     };
 
     useEffect(() => {
-        setImportance(initialImportance);
+        setImportance(initialImportance); 
     }, [initialImportance]);
 
     return (
         <Dialog.Root open={open} onOpenChange={setOpen}>
             <Dialog.Trigger asChild>
-                <button className="Button violet">Edit Position Importance</button>
+                <div className="w-3xs bg-violet-200 border-2 rounded-md justify-center px-2 py-1 inline-flex h-20 select-none cursor-pointer items-center hover:bg-violet-300 transition duration-300">Edit Position Importance</div>
             </Dialog.Trigger>
             <Dialog.Portal>
                 <Dialog.Overlay className="DialogOverlay" />
-                <Dialog.Content className="DialogContent">
-                    <Dialog.Title className="DialogTitle">Edit Position Importance</Dialog.Title>
-                    <Dialog.Description className="DialogDescription">
+                <Dialog.Content className="DialogContent bg-gray-100">
+                    {/* <Dialog.Title className="font-mono tracking-tight text-left font-bold text-lg -mt-2">Edit Position Importance</Dialog.Title> */}
+                    <Dialog.Description className="font-mono text-[17px] text-left text-lg">
                         Edit the importance you give to each position, this will be used to calculate the optimal defensive lineup.
                     </Dialog.Description>
 
-                    <div className="SliderHolder" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                    <div className="mt-6 space-y-3">
                     {Object.entries(importance).map(([position, initialValue]) => (
-                            <div key={position} style={{ display: "flex", gap: "20px", alignItems: "center" }}>
-                                <h2 style={{marginRight: "30px", width:'35px', textAlign: "right"}}>{position}: </h2>
+                            <div key={position} className="flex flex-row justify-center align-center gap-2 items-center">
+                                <h2 className="w-4 mr-3 text-lg font-mono font-semibold tracking-wide">{position}: </h2>
                                 <Slider.Root
                                     value={[importance[position]]}  // Controlled value
                                     onValueChange={(value) => handleValueChange(position, value[0])}
@@ -77,7 +77,7 @@ const ImportanceModal = ({ updateImportance, initialImportance }: ImportanceModa
                                     </Slider.Track>
                                     <Slider.Thumb className="SliderThumb" aria-label="Volume" />
                                 </Slider.Root>
-                                <h2 >{initialValue}%</h2>
+                                <h2 className="w-4 ml-2 text-lg font-mono font-semibold italic tracking-wide">{initialValue}%</h2>
                             </div>
                         ))}
                     </div>
