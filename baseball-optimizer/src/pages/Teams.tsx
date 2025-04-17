@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
-import { InputLabel, TextField } from '@mui/material';
+import { TextField } from '@mui/material';
 import DivisionSelect from '../components/DivisionSelect';
 import DatePicker from '../components/DatePicker';
 import TeamCard from '../components/TeamCard';
@@ -50,7 +49,7 @@ const Teams = () => {
           division: division
         })
       });
-      const res = await response.json();
+      await response.json();
       fetchTeams(user.id);
     }
   }
@@ -86,7 +85,7 @@ const Teams = () => {
        <div className="hover:bg-zinc-50 dark:bg-slate-800 py-3 transition-discrete duration-100 bg-white shadow-md shadow-slate-500 rounded-2xl flex relative justify-center items-center max-w-1/5 flex-wrap w-100 mx-auto mt-10 select-none space-y-15">
         <h1 className='dark:text-amber-500 absolute top-0 left-5 font-[500] mt-3'>Add Team:</h1>
         <div className='flex flex-col mt-8 mr-5 items-start mb-20'>
-          <TextField className="font-[500] rounded-lg" size="small" /* sx={{input: {color: 'white'}, label: {color: 'white'}, border: {color: 'white'}}}*/ onChange={handleNameChange} value={teamName} label="Team Name" variant="outlined"/>
+          <TextField className="font-[500] rounded-lg" size="small" onChange={handleNameChange} value={teamName} label="Team Name" variant="outlined"/>
           <DatePicker setYear={setYear}/>
         </div>
         <DivisionSelect setDivision={setDivision}/>

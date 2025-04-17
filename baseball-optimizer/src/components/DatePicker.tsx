@@ -1,5 +1,5 @@
 import React from "react";
-import { MenuItem, Select, InputLabel, FormControl } from "@mui/material";
+import { MenuItem, Select, FormControl } from "@mui/material";
 
 interface DatePickerProps {
   setYear: (year: string) => void;
