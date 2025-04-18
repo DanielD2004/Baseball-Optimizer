@@ -16,7 +16,7 @@ import requests
 load_dotenv(override=True)
 app = Flask(__name__)
 
-CORS(app, origins=["https://baseball-optimizer.onrender.com", "localhost:5173"])
+CORS(app)
 uri = os.environ.get("MONGO_URI") 
 
 if not uri:
