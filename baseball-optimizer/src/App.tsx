@@ -21,7 +21,7 @@ function App() {
           "full_name": user.fullName, 
           "email": user.emailAddresses[0].emailAddress,
         }
-        const response = await fetch(`https://baseball-optimizer.onrender.com//api/users`, {
+        const response = await fetch(`https://baseball-optimizer.onrender.com/api/users`, {
         method: 'POST',
         headers: {
         'Content-Type': 'application/json',
