@@ -1,0 +1,27 @@
+{
+    "version": 2,
+    "builds": [
+      {
+        "src": "src/backend/optimizer.py",  
+        "use": "@vercel/python",          
+        "config": { "maxLambdaSize": "15mb" }
+      },
+      {
+        "src": "frontend",                
+        "use": "@vercel/static-build",     
+        "config": {
+          "distDir": "dist"            
+        }
+      }
+    ],
+    "routes": [
+      {
+        "src": "/api/(.*)",                
+        "dest": "src/backend/optimizer.py"   
+      },
+      {
+        "src": "/(.*)",                     
+        "dest": "frontend/$1"           
+      }
+    ]
+  }

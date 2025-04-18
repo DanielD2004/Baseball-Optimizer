@@ -37,7 +37,7 @@ const Teams = () => {
 
   const addTeam = async() => {
     if (user && division && year){
-      const response = await fetch(`/api/teams`, {
+      const response = await fetch(`http://localhost:5000/api/teams`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
