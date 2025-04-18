@@ -22,13 +22,11 @@ uri = os.environ.get("MONGO_URI")
 
 if not uri:
     print("Warning: MONGO_URI not found in environment variables")
-    uri = "mongodb://localhost:27017"  # Fallback for local development only
+    uri = "mongodb://localhost:27017" 
 
 client = MongoClient(
     uri,
-    tlsCAFile=certifi.where(),  # ← forces trusted CA bundle
-    server_api=ServerApi('1'),
-    serverSelectionTimeoutMS=5000
+    server_api=ServerApi('1')
 )
 
 db = client["Optimizer"]
