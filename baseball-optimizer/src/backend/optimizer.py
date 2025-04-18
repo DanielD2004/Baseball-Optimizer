@@ -35,9 +35,9 @@ db = client["Optimizer"]
 
 try:
     client.admin.command('ping')
-    print("Pinged your deployment. You successfully connected to MongoDB!")
+    print("Successfully connected to MongoDB.")
 except Exception as e:
-    print(e)
+    print("MongoDB connection error:", str(e))
 # Enable detailed logging for debugging
 # logging.basicConfig(level=logging.DEBUG)
 
@@ -488,6 +488,14 @@ def optimize(team_id):
 def ping():
     return 'pong'
 
+@app.route("/test-mongo")
+def test_mongo():
+    try:
+        client.admin.command("ping")
+        return jsonify({"status": "success", "message": "Connected to MongoDB"}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
