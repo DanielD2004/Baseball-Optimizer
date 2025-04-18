@@ -16,7 +16,7 @@ import requests
 load_dotenv(override=True)
 app = Flask(__name__)
 
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 uri = os.environ.get("MONGO_URI") 
 
 if not uri:
