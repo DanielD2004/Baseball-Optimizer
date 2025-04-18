@@ -11,6 +11,7 @@ from bson import ObjectId
 from dotenv import load_dotenv
 from pymongo.server_api import ServerApi
 import os
+import certifi
 import requests
 
 load_dotenv(override=True)
@@ -23,7 +24,13 @@ if not uri:
     print("Warning: MONGO_URI not found in environment variables")
     uri = "mongodb://localhost:27017"  # Fallback for local development only
 
-client = MongoClient(uri, server_api=ServerApi('1'), serverSelectionTimeoutMS=5000)
+client = MongoClient(
+    uri,
+    tlsCAFile=certifi.where(),  # ← forces trusted CA bundle
+    server_api=ServerApi('1'),
+    serverSelectionTimeoutMS=5000
+)
+
 db = client["Optimizer"]
 
 try:
