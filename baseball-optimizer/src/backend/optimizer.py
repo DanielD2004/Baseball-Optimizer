@@ -8,16 +8,22 @@ import logging
 import time
 from pymongo import MongoClient
 from bson import ObjectId
-from dotenv import dotenv_values
+from dotenv import load_dotenv
 from pymongo.server_api import ServerApi
 import os
 import requests
 
-config = dotenv_values(".env")
+load_dotenv(override=True)
 app = Flask(__name__)
+
 CORS(app, origins=["https://baseball-optimizer.onrender.com", "localhost:5173"])
-uri = config.get("MONGO_URI")
-client = MongoClient(uri, server_api=ServerApi('1'))
+uri = os.environ.get("MONGO_URI") 
+
+if not uri:
+    print("Warning: MONGO_URI not found in environment variables")
+    uri = "mongodb://localhost:27017"  # Fallback for local development only
+
+client = MongoClient(uri, server_api=ServerApi('1'), serverSelectionTimeoutMS=5000)
 db = client["Optimizer"]
 
 try:
