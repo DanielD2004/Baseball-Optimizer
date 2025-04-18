@@ -64,7 +64,7 @@ const AddPlayer = ({ updatePlayers, player, disabled}: AddPlayerProps) => {
 	const updatePlayer = async () => {
 		if (!player) return;
 		try {
-			const response = await fetch(`/api/teams/${team.team_id}/players/update`, {
+			const response = await fetch(`https://baseball-optimizer.onrender.com/api/teams/${team.team_id}/players/update`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -94,7 +94,7 @@ const AddPlayer = ({ updatePlayers, player, disabled}: AddPlayerProps) => {
 	};
 
 	const AddPlayer = async() => {
-    		const response = await fetch(`/api/teams/${team.team_id}/players`, {
+    		const response = await fetch(`https://baseball-optimizer.onrender.com/api/teams/${team.team_id}/players`, {
     			method: 'POST',
     			headers: {
     			  'Content-Type': 'application/json',
