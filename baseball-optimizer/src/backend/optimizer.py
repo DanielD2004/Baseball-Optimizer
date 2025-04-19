@@ -8,34 +8,23 @@ import logging
 import time
 from pymongo import MongoClient
 from bson import ObjectId
-from dotenv import load_dotenv
+from dotenv import dotenv_values
 from pymongo.server_api import ServerApi
 import os
-import certifi
 import requests
 
-load_dotenv(override=True)
+config = dotenv_values(".env")
 app = Flask(__name__)
-
-CORS(app, resources={r"/*": {"origins": "*"}})
-uri = os.environ.get("MONGO_URI") 
-
-if not uri:
-    print("Warning: MONGO_URI not found in environment variables")
-    uri = "mongodb://localhost:27017" 
-
-client = MongoClient(
-    uri,
-    server_api=ServerApi('1')
-)
-
+CORS(app, origins="http://localhost:5173")
+uri = config.get("MONGO_URI")
+client = MongoClient(uri, server_api=ServerApi('1'))
 db = client["Optimizer"]
 
 try:
     client.admin.command('ping')
-    print("Successfully connected to MongoDB.")
+    print("Pinged your deployment. You successfully connected to MongoDB!")
 except Exception as e:
-    print("MongoDB connection error:", str(e))
+    print(e)
 # Enable detailed logging for debugging
 # logging.basicConfig(level=logging.DEBUG)
 
@@ -307,8 +296,6 @@ def index():
     return """
     <h1>Yo</h1>
     """
-def serve():
-    return send_from_directory(app.static_folder, 'index.html')
 
 # Get all teams for a user
 @app.route("/api/teams/<user_id>", methods=["GET"])
@@ -486,15 +473,6 @@ def optimize(team_id):
 def ping():
     return 'pong'
 
-@app.route("/test-mongo")
-def test_mongo():
-    try:
-        client.admin.command("ping")
-        return jsonify({"status": "success", "message": "Connected to MongoDB"}), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
-    
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
-
+    app.run(host='0.0.0.0', port=port, debug=True)
