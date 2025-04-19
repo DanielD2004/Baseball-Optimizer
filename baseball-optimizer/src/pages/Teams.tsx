@@ -5,6 +5,8 @@ import DivisionSelect from '../components/DivisionSelect';
 import DatePicker from '../components/DatePicker';
 import TeamCard from '../components/TeamCard';
 
+const URL = import.meta.env.NGROK_URL
+
 interface Team {
   team_id: number;
   user_id: number;
@@ -22,7 +24,7 @@ const Teams = () => {
 
     const fetchTeams = async(userID: string) => {
       try{
-        const response = await fetch(`http://localhost:5000/api/teams/${userID}`, {
+        const response = await fetch(`${URL}/api/teams/${userID}`, {
         method: 'GET',
         headers: {
         'Content-Type': 'application/json',
@@ -37,7 +39,7 @@ const Teams = () => {
 
   const addTeam = async() => {
     if (user && division && year){
-      const response = await fetch(`http://localhost:5000/api/teams`, {
+      const response = await fetch(`${URL}/api/teams`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

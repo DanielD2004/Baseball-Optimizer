@@ -7,6 +7,8 @@ import TeamPage from './pages/TeamPage.tsx'
 import OptimizedPage from './pages/OptimizedPage.tsx'
 import './App.css'
 
+const URL = import.meta.env.NGROK_URL
+
 function App() {
   const { user } = useUser()
 
@@ -21,7 +23,7 @@ function App() {
           "full_name": user.fullName, 
           "email": user.emailAddresses[0].emailAddress,
         }
-        const response = await fetch(`http://localhost:5000/api/users`, {
+        const response = await fetch(`${URL}/api/users`, {
         method: 'POST',
         headers: {
         'Content-Type': 'application/json',

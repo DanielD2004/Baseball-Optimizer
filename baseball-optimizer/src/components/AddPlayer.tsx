@@ -7,6 +7,8 @@ import PlayerRating from "./PlayerRating";
 import { TextField } from '@mui/material';
 import { useLocation } from 'react-router-dom'
 
+const URL = import.meta.env.NGROK_URL
+
 type PositionOption = {
 	label: string;
   }
@@ -64,7 +66,7 @@ const AddPlayer = ({ updatePlayers, player, disabled}: AddPlayerProps) => {
 	const updatePlayer = async () => {
 		if (!player) return;
 		try {
-			const response = await fetch(`http://localhost:5000/api/teams/${team.team_id}/players/update`, {
+			const response = await fetch(`${URL}/api/teams/${team.team_id}/players/update`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -94,7 +96,7 @@ const AddPlayer = ({ updatePlayers, player, disabled}: AddPlayerProps) => {
 	};
 
 	const AddPlayer = async() => {
-    		const response = await fetch(`http://localhost:5000/api/teams/${team.team_id}/players`, {
+    		const response = await fetch(`${URL}/api/teams/${team.team_id}/players`, {
     			method: 'POST',
     			headers: {
     			  'Content-Type': 'application/json',
