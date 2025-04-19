@@ -15,7 +15,7 @@ import requests
 
 config = dotenv_values(".env")
 app = Flask(__name__)
-CORS(app, origins="http://localhost:5173")
+CORS(app)
 uri = config.get("MONGO_URI")
 client = MongoClient(uri, server_api=ServerApi('1'))
 db = client["Optimizer"]
