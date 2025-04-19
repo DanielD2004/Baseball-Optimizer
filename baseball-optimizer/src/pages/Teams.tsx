@@ -5,7 +5,7 @@ import DivisionSelect from '../components/DivisionSelect';
 import DatePicker from '../components/DatePicker';
 import TeamCard from '../components/TeamCard';
 
-const URL = import.meta.env.NGROK_URL
+const URL = import.meta.env.VITE_NGROK_URL
 
 interface Team {
   team_id: number;

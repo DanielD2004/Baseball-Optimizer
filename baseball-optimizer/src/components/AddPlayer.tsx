@@ -7,7 +7,7 @@ import PlayerRating from "./PlayerRating";
 import { TextField } from '@mui/material';
 import { useLocation } from 'react-router-dom'
 
-const URL = import.meta.env.NGROK_URL
+const URL = import.meta.env.VITE_NGROK_URL
 
 type PositionOption = {
 	label: string;

@@ -11,7 +11,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 
-const URL = import.meta.env.NGROK_URL
+const URL = import.meta.env.VITE_NGROK_URL
 
 interface Team {
     team_id: string;

@@ -7,7 +7,7 @@ import TeamPage from './pages/TeamPage.tsx'
 import OptimizedPage from './pages/OptimizedPage.tsx'
 import './App.css'
 
-const URL = import.meta.env.NGROK_URL
+const URL = import.meta.env.VITE_NGROK_URL
 
 function App() {
   const { user } = useUser()

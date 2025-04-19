@@ -4,7 +4,7 @@ import { useUser } from '@clerk/clerk-react';
 import AddPlayer from '../components/AddPlayer';
 import ImportanceModal from '../components/ImportanceModal';
 
-const URL = import.meta.env.NGROK_URL
+const URL = import.meta.env.VITE_NGROK_URL
 
 interface Team {
     team_id: string;
