@@ -23,7 +23,6 @@ interface ImportanceModalProps {
 }
 
 const ImportanceModal = ({ updateImportance, initialImportance }: ImportanceModalProps) => {
-    const [open, setOpen] = useState(false);
     const [importance, setImportance] = useState<Importance>(initialImportance);
 
     const handleValueChange = (position: string, value: number) => {
@@ -35,7 +34,6 @@ const ImportanceModal = ({ updateImportance, initialImportance }: ImportanceModa
 
     const handleSubmit = async () => {
         updateImportance(importance);  // use prop
-        setOpen(false); // close the modal after update
     };
 
     useEffect(() => {
@@ -43,9 +41,9 @@ const ImportanceModal = ({ updateImportance, initialImportance }: ImportanceModa
     }, [initialImportance]);
 
     return (
-        <Dialog.Root open={open} onOpenChange={setOpen}>
+        <Dialog.Root>
             <Dialog.Trigger asChild>
-                <div className="w-3xs bg-violet-200 border-2 rounded-md justify-center px-2 py-1 inline-flex h-20 select-none cursor-pointer items-center hover:bg-violet-300 transition duration-300">Edit Position Importance</div>
+                <div onClick={()=> setImportance(initialImportance)} className="w-3xs bg-violet-200 border-2 rounded-md justify-center px-2 py-1 inline-flex h-20 select-none cursor-pointer items-center hover:bg-violet-300 transition duration-300">Edit Position Importance</div>
             </Dialog.Trigger>
             <Dialog.Portal>
                 <Dialog.Overlay className="DialogOverlay" />
@@ -77,13 +75,15 @@ const ImportanceModal = ({ updateImportance, initialImportance }: ImportanceModa
                         ))}
                     </div>
 
-                    <div style={{ display: "flex", marginTop: 25, justifyContent: "flex-end" }}>
-                        <button onClick={handleSubmit} className="Button green">Save changes</button>
-                    </div>
+                    <Dialog.Close asChild>
+                        <div onClick={handleSubmit} className={`bg-cyan-200 w-fit mx-auto p-2 rounded-lg mt-5 hover:bg-cyan-300 transition transition-duration-300 select-none shadow-gray-600 shadow-sm`}>Save Changes</div>
+                    </Dialog.Close>
 
-                    <button onClick={() => setOpen(false)} className="IconButton" aria-label="Close">
-                        <Cross2Icon />
-                    </button>
+                    <Dialog.Close asChild>
+                        <button className="IconButton" aria-label="Close">
+                            <Cross2Icon />
+                        </button>
+                    </Dialog.Close>
                 </Dialog.Content>
             </Dialog.Portal>
         </Dialog.Root>

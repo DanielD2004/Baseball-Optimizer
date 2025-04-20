@@ -38,7 +38,7 @@ const Teams = () => {
     }
 
   const addTeam = async() => {
-    if (user && division && year){
+    if (user && division && year && teamName){
       const response = await fetch(`${URL}/api/teams`, {
         method: 'POST',
         headers: {
@@ -69,8 +69,8 @@ const Teams = () => {
   }, [user]);
 
   return (
-    <div id="teams">
-      <h1 id="my-teams-header" className="dark:text-white -mt-15 mb-1 text-slate-600 uppercase text-7xl font-bold font-mono text-center tracking-wide text-shadow-slate-300 text-shadow-lg dark:text-shadow-2xl dark:text-shadow-black">My Teams</h1>
+    <div id="teams" className='select-none'>
+      <h1 id="my-teams-header" className="select-none dark:text-white -mt-15 mb-1 text-slate-600 uppercase text-7xl font-bold font-mono text-center tracking-wide text-shadow-slate-300 text-shadow-lg dark:text-shadow-2xl dark:text-shadow-black">My Teams</h1>
       <hr className='border-1 mb-4'/>
       {teams.length > 0 ? (
           // y space between children
@@ -87,16 +87,18 @@ const Teams = () => {
        <div className="hover:bg-zinc-50 dark:bg-slate-800 py-3 transition-discrete duration-100 bg-white shadow-md shadow-slate-500 rounded-2xl flex relative justify-center items-center max-w-1/5 flex-wrap w-100 mx-auto mt-10 select-none space-y-15">
         <h1 className='dark:text-amber-500 absolute top-0 left-5 font-[500] mt-3'>Add Team:</h1>
         <div className='flex flex-col mt-8 mr-5 items-start mb-20'>
-          <TextField className="font-[500] rounded-lg" size="small" onChange={handleNameChange} value={teamName} label="Team Name" variant="outlined"/>
+          <TextField error={teamName.length === 0} className="font-[500] rounded-lg" size="small" onChange={handleNameChange} value={teamName} label="Team Name" variant="outlined"/>
           <DatePicker setYear={setYear}/>
         </div>
         <DivisionSelect setDivision={setDivision}/>
-        <div onClick={addTeam} className='-mt-10 transition transition-duration-300 border-2 border-slate-400 bg-slate-100 hover:bg-gray-200 rounded-lg p-2 w-fit h-10 flex justify-center items-center cursor-pointer select-none'>
-          Add Team
-        </div>
+          <div onClick={addTeam} className={`${!teamName || !division || !year ? "cursor-not-allowed bg-rose-400 opacity-50 " : "hover:bg-gray-200 cursor-pointer  bg-slate-100 "} shadow-gray-600 shadow-sm -mt-10 transition transition-duration-300 border-2 border-slate-400 rounded-lg p-2 w-fit h-10 flex justify-center items-center select-none`}>
+            Add Team
+          </div>
       </div>
     </div>
   );
 };
 
 export default Teams;
+
+// className={`${name.length === 0 ? "pointer-events-none bg-red-300 opacity-50" : ""} bg-cyan-200 w-fit mx-auto p-2 rounded-lg mt-5 hover:bg-cyan-300 transition transition-duration-300 select-none shadow-gray-600 shadow-sm`}

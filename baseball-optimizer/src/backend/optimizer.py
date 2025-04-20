@@ -199,6 +199,7 @@ def optimize_softball_lineup(team_data):
             prob += (cumulative_sits[(p["id"], i)] - 1 <= M * v[(p["id"], i)],
                     f"Track_AtLeastTwoSits_Max_{p['id']}_{i}")
 
+    #  CONSTRAIN 9:
     # Binary variables: 
     # v1[p, i] = 1 if player p has sat at least once by inning i
     # v2[p, i] = 1 if player p has sat at least twice by inning i

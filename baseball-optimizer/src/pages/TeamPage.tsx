@@ -225,7 +225,7 @@ function TeamPage() {
                 <h2>No data</h2>
             )}
             <div className='sticky flex flex-col gap-4 items-center pb-20 md:flex-row md:justify-center'>
-                <AddPlayer disabled={players.length >= 15} key={players.length} updatePlayers={fetchPlayers} player={defaultPlayer} />
+                <AddPlayer playing={true} disabled={players.length >= 15} key={players.length} updatePlayers={fetchPlayers} player={defaultPlayer} />
                 <Link to={`/teams/${team.team_name}/${team.season}/optimized`} state={{team, isPlaying}}>
                     <div className="w-3xs bg-violet-300 border-2 rounded-md justify-center px-2 py-1 inline-flex h-20 select-none cursor-pointer items-center hover:bg-violet-300 transition duration-300">
                         Generate Lineup

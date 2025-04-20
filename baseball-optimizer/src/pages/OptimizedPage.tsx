@@ -61,6 +61,7 @@ function OptimizedPage() {
     const innings: string[] = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
     const [loading, setLoading] = useState<boolean>(true);
     const [result, setResult] = useState<{ [playerName: string]: string[] } | null>(null);
+    const [rowOrder, setRowOrder] = useState<string[]>([]);
     const [players, setPlayers] = useState();
     const [importance, setImportance] = useState();
     const location = useLocation();
@@ -116,7 +117,10 @@ function OptimizedPage() {
             });
     
             const data = await response.json();
-            setResult(getPlayerPositionsByInning(data));
+            const processedData = getPlayerPositionsByInning(data)
+            setResult(processedData);
+            setRowOrder(Object.keys(processedData))
+            sessionStorage.setItem("rowOrder", JSON.stringify(Object.keys(processedData)))
             setLoading(false);
         } catch (err) {
             console.error(err);
@@ -124,6 +128,57 @@ function OptimizedPage() {
         }
     }
 
+    
+    function getPlayerPositionsByInning(schedule: Schedule) {
+        const playerPositionsByInning: { [playerName: string]: string[] } = {};
+        const innings = 9;
+        // init all players with arrays of 'X'
+        for (const inningNum in schedule.schedule) {
+            const inning = schedule.schedule[inningNum]; // inning is the object with field and bench subObjects
+            // add bench
+            inning.bench.forEach((player: schedulePlayer) => {
+                if (!playerPositionsByInning[player.name]) {
+                    playerPositionsByInning[player.name] = Array(innings).fill("X");
+                }
+            });
+            // add field 
+            inning.field.forEach((player: schedulePlayer) => {
+                if (!playerPositionsByInning[player.name]) {
+                    playerPositionsByInning[player.name] = Array(innings).fill("X");
+            }
+        });
+    }
+    // fill in proper positions
+    for (const inningNum in schedule.schedule) {
+        const inning = schedule.schedule[inningNum];
+        const indexPosition = parseInt(inningNum) - 1; // convert to 0 index
+        
+        // set field positions
+        inning.field.forEach((player: schedulePlayer) => {
+            // access object through player name and update position array accordingly
+            playerPositionsByInning[player.name][indexPosition] = player.position ?? "X";
+        });
+        }
+        return playerPositionsByInning;
+    }
+    
+    const moveRow = (index: number, direction: "up" | "down") => {
+        setRowOrder((prev) => {
+            const newOrder = [...prev]
+            const newIndex = direction === "up" ? index - 1 : index + 1
+            if (newIndex >= rowOrder.length || newIndex < 0) {
+                return prev;
+            }
+            else{
+                // swap the orders
+                const temp = newOrder[index]
+                newOrder[index] = newOrder[newIndex]
+                newOrder[newIndex] = temp
+                sessionStorage.setItem("rowOrder", JSON.stringify(newOrder))
+                return newOrder
+            }
+        })
+    }
     useEffect(() => {
         fetchPlayers();
         fetchImportance();
@@ -144,46 +199,9 @@ function OptimizedPage() {
 
     useEffect(() => {
         if (players && importance) {
-            console.log("Players and importance are set, getting lineup")
             getLineup();
         }
     }, [players, importance]);
-    
-    function getPlayerPositionsByInning(schedule: Schedule) {
-        const playerPositionsByInning: { [playerName: string]: string[] } = {};
-        const innings = 9;
-        
-        // init all players with arrays of 'X'
-        for (const inningNum in schedule.schedule) {
-          const inning = schedule.schedule[inningNum]; // inning is the object with field and bench subObjects
-          // add bench
-          inning.bench.forEach((player: schedulePlayer) => {
-            if (!playerPositionsByInning[player.name]) {
-              playerPositionsByInning[player.name] = Array(innings).fill("X");
-            }
-          });
-          // add field 
-          inning.field.forEach((player: schedulePlayer) => {
-            if (!playerPositionsByInning[player.name]) {
-              playerPositionsByInning[player.name] = Array(innings).fill("X");
-            }
-          });
-        }
-        
-        // fill in proper positions
-        for (const inningNum in schedule.schedule) {
-          const inning = schedule.schedule[inningNum];
-          const indexPosition = parseInt(inningNum) - 1; // convert to 0 index
-          
-          // set field positions
-          inning.field.forEach((player: schedulePlayer) => {
-            // access object through player name and update position array accordingly
-            playerPositionsByInning[player.name][indexPosition] = player.position ?? "X";
-          });
-        }
-        console.log(playerPositionsByInning)
-        return playerPositionsByInning;
-      }
 
       return (
         <div className='bg-cyan-50'>
@@ -208,16 +226,25 @@ function OptimizedPage() {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {result && Object.entries(result).map(([playerName, positions]) => (
-                                    <TableRow key={playerName}>
-                                        <TableCell align="center" sx={{fontWeight: 'bold'}} scope="row">{playerName}</TableCell>
-                                        {positions.map((position, index) => (
-                                            <TableCell key={index} align="center" sx={{backgroundColor: position === 'X' ? '#ff999b' : '#99ffa3', fontWeight: 'bold'}}>
-                                                {position}
+                                {/* Object.entries(result).map(([playerName, positions], index) this way, index could change - objects are unordered and can change */}
+                                {/* keeps consistent indexing */}
+                                {result && rowOrder.map((playerName, index) => {
+                                    const positions = result[playerName]
+                                    return (
+                                        <TableRow key={playerName}>
+                                            <TableCell>
+                                                <div className='flex flex-row gap-3 w-fit font-bold mx-auto'>
+                                                    <h2 className='select-none mt-1 mr-5'>{playerName}</h2>
+                                                    <div onClick={() => moveRow(index, "up")} className='select-none cursor-pointer bg-gray-200 p-1 w-15 text-center rounded-lg border-black border-1'>Up</div>
+                                                    <div onClick={() => moveRow(index, "down")} className='select-none cursor-pointer bg-gray-200 p-1 w-15 text-center rounded-lg border-black border-1'>Down</div>
+                                                </div>
                                             </TableCell>
-                                        ))}
-                                    </TableRow>
-                                ))}
+                                            {positions.map((position, i) => (
+                                                <TableCell key={i} align="center"  sx={{backgroundColor: position === 'X' ? '#ff999b' : '#99ffa3', fontWeight: 'bold'}}>{position}</TableCell>
+                                            ))}
+                                        </TableRow>
+                                    );
+                                })}
                             </TableBody>
                         </Table>
                     </TableContainer>

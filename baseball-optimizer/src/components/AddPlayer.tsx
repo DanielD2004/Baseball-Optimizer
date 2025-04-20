@@ -139,7 +139,7 @@ const AddPlayer = ({ updatePlayers, player, disabled, playing}: AddPlayerProps) 
     return (
 		<Dialog.Root>
 		<Dialog.Trigger asChild>
-			<div className={`rounded cursor-pointer select-none inline-flex items-center justify-center p-2 hover:bg-violet-300 transition duration-300 ${playing ? "bg-violet-200" : "bg-black text-white"} ${player.default ? 'border-2 h-20 w-3xs' : 'mb-1'} ${disabled ? 'bg-gray-400 text-gray-600 cursor-not-allowed pointer-events-none' : 'text-gray-700'}`}> {player.default ? 'Add a Player' : player.player_name}</div>
+			<div className={`${disabled ? 'bg-gray-400 text-gray-600 cursor-not-allowed pointer-events-none opacity-75 text-white border-black' : `${playing ? "bg-violet-200" : "bg-black text-white"}`} rounded cursor-pointer select-none inline-flex items-center justify-center p-2 hover:bg-violet-300 transition duration-300  ${player.default ? 'border-2 h-20 w-3xs' : 'mb-1'} `}> {player.default ? 'Add a Player' : player.player_name}</div>
 		</Dialog.Trigger>
 		<Dialog.Portal>
 			<Dialog.Overlay className="DialogOverlay" />
