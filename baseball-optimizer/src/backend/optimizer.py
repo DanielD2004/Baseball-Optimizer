@@ -16,6 +16,7 @@ import requests
 config = dotenv_values(".env")
 app = Flask(__name__)
 CORS(app)
+
 uri = config.get("MONGO_URI")
 client = MongoClient(uri, server_api=ServerApi('1'))
 db = client["Optimizer"]
@@ -154,6 +155,7 @@ def optimize_softball_lineup(team_data):
                 f"Count_Total_Sits_{p['id']}")
 
     # CONSTRAINT 4: Maximum difference of 1 sit between any two players (fairness)
+    # more concerned with total sits at end of game
     max_sit_diff = 1
     for p1 in players:
         for p2 in players:
@@ -197,14 +199,41 @@ def optimize_softball_lineup(team_data):
             prob += (cumulative_sits[(p["id"], i)] - 1 <= M * v[(p["id"], i)],
                     f"Track_AtLeastTwoSits_Max_{p['id']}_{i}")
 
-    # CONSTRAINT 9: Ensure fair rotation - no player can sit twice before everyone sits once
+    # Binary variables: 
+    # v1[p, i] = 1 if player p has sat at least once by inning i
+    # v2[p, i] = 1 if player p has sat at least twice by inning i
+    v1 = pl.LpVariable.dicts("SatOnce", ((p["id"], i) for p in players for i in innings), cat='Binary')
+    v2 = pl.LpVariable.dicts("SatTwice", ((p["id"], i) for p in players for i in innings), cat='Binary')
+    v3 = pl.LpVariable.dicts("SatThree", ((p["id"], i) for p in players for i in innings), cat='Binary')
+
+    M = num_innings  # Big-M value used to simulate logical conditions
+
+    # Link v1 and v2 to cumulative sit counts
+    for p in players:
+        pid = p["id"]
+        for i in innings:
+            # If v1 = 1, then cumulative_sits ≥ 1
+            prob += v1[(pid, i)] <= cumulative_sits[(pid, i)]
+            prob += cumulative_sits[(pid, i)] <= M * v1[(pid, i)]
+
+            # If v2 = 1, then cumulative_sits ≥ 2
+            prob += 2 * v2[(pid, i)] <= cumulative_sits[(pid, i)]
+            prob += cumulative_sits[(pid, i)] - 1 <= M * v2[(pid, i)]
+
+            # v3 = 1 if cumulative_sits ≥ 3
+            prob += 3 * v3[(pid, i)] <= cumulative_sits[(pid, i)]
+            prob += cumulative_sits[(pid, i)] - 2 <= M * v3[(pid, i)]
+
+    # Enforce fair sit progression:
+    # No one can sit twice unless everyone else has sat at least once
     for i in innings:
         for p1 in players:
             for p2 in players:
                 if p1["id"] != p2["id"]:
-                    # If p1 has sat at least twice by inning i, then p2 must have sat at least once by inning i
-                    prob += (cumulative_sits[(p2["id"], i)] >= v[(p1["id"], i)],
-                            f"Fair_Rotation_{p1['id']}_{p2['id']}_{i}")
+                    prob += v1[(p2["id"], i)] >= v2[(p1["id"], i)], f"FairSit_{p1['id']}_{p2['id']}_Inning_{i}"
+                    prob += v2[(p2["id"], i)] >= v3[(p1["id"], i)], f"FairSit3_{p1['id']}_{p2['id']}_Inning_{i}"
+
+
 
     # CO-ED RULE: Handle women players if present (conditional constraint)
     women_count = sum(1 for p in players if p.get("gender") == "F")

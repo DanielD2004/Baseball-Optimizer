@@ -5,6 +5,7 @@ import Teams from './pages/Teams.tsx'
 import Header from './components/Header.tsx'
 import TeamPage from './pages/TeamPage.tsx'
 import OptimizedPage from './pages/OptimizedPage.tsx'
+import './App.css'
 
 const URL = import.meta.env.VITE_NGROK_URL
 
