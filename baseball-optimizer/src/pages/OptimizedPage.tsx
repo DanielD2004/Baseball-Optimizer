@@ -32,11 +32,17 @@ interface Inning {
     bench: Player[];
 }
 
+interface PositionOption {
+    label: string;
+}
+
 interface Player {
-    id: string;
-    name: string;
-    position: string;
+    player_name: string;
+    team_id: string;
     skill: number;
+    positions: { [key: string]: PositionOption };
+    player_id?: string;
+    default: boolean;
     gender: string;
 }
 
@@ -53,7 +59,7 @@ function OptimizedPage() {
     const [players, setPlayers] = useState();
     const [importance, setImportance] = useState();
     const location = useLocation();
-    const team: Team = location.state as Team;
+    const { team, isPlaying } = location.state;
     const { user } = useUser();
     const navigate = useNavigate();
 
@@ -68,7 +74,8 @@ function OptimizedPage() {
                 });
                 const data = await response.json();
                 if (data) {
-                    setPlayers(data);
+                    const activePlayers = data.filter((player: Player) => isPlaying[player.player_name]);
+                    setPlayers(activePlayers);
                 }
             } catch (err) {
                 console.error(err);

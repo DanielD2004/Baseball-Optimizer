@@ -35,9 +35,10 @@ interface AddPlayerProps {
 	updatePlayers: () => void;
 	player: Player;
 	disabled?: boolean;
+	playing?: boolean;
 }
 
-const AddPlayer = ({ updatePlayers, player, disabled}: AddPlayerProps) => {
+const AddPlayer = ({ updatePlayers, player, disabled, playing}: AddPlayerProps) => {
 	const [name, setName] = useState<string>(player.player_name);
 	const [rating, setRating] = useState<number>(player.skill);
 	const [selectedPositions, setSelectedPositions] = useState<{ [key: string]: PositionOption }>(player.positions);
@@ -60,7 +61,7 @@ const AddPlayer = ({ updatePlayers, player, disabled}: AddPlayerProps) => {
 	}
 	
 	const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setName(e.target.value);
+		setName(e.target.value.trim());
 	};
 
 	const updatePlayer = async () => {
@@ -115,19 +116,13 @@ const AddPlayer = ({ updatePlayers, player, disabled}: AddPlayerProps) => {
     	}
 
 	const checkSubmit = (e: React.MouseEvent<HTMLDivElement>) => {
-		if (name.trim() == "") {
-			alert("Please Fill Out All Fields");
-			e.preventDefault()
-			return;
+		if(player.default) {
+			AddPlayer();
+			return
 		}
-		else{
-			if(player.default) {
-				AddPlayer();
-				return
-			}
-			updatePlayer(); 
-		}
+		updatePlayer(); 
 	}
+	
 	
 	const handleGenderChange = (checked: boolean) => {
 		setGender(checked ? "Female" : "Male"); 
@@ -144,13 +139,13 @@ const AddPlayer = ({ updatePlayers, player, disabled}: AddPlayerProps) => {
     return (
 		<Dialog.Root>
 		<Dialog.Trigger asChild>
-			<div className={`rounded cursor-pointer select-none inline-flex items-center justify-center p-2 hover:bg-violet-300 transition duration-300 ${player.default ? 'border-2 h-20 w-3xs' : 'mb-1'} ${disabled ? 'bg-gray-400 text-gray-600 cursor-not-allowed pointer-events-none' : 'bg-violet-200 hover:bg-violet-300 text-gray-700'}`}> {player.default ? 'Add a Player' : player.player_name}</div>
+			<div className={`rounded cursor-pointer select-none inline-flex items-center justify-center p-2 hover:bg-violet-300 transition duration-300 ${playing ? "bg-violet-200" : "bg-black text-white"} ${player.default ? 'border-2 h-20 w-3xs' : 'mb-1'} ${disabled ? 'bg-gray-400 text-gray-600 cursor-not-allowed pointer-events-none' : 'text-gray-700'}`}> {player.default ? 'Add a Player' : player.player_name}</div>
 		</Dialog.Trigger>
 		<Dialog.Portal>
 			<Dialog.Overlay className="DialogOverlay" />
 			<Dialog.Content className="DialogContent bg-gray-100">
 				<Dialog.Title className="text-left font-extrabold ml-5 text-lg font-mono tracking-wide">{player.default ? "Add Player" : "Update Player"}</Dialog.Title>
-				<Dialog.Description className="text-left ml-5 my-2 font-mono tracking-tight">
+				<Dialog.Description className="text-left ml-5 mb-6 my-2 font-mono tracking-tight">
 					{player.default ? "Add a player to your team, include their name, skill rating and position preferences" : ""}
 				</Dialog.Description>
 
@@ -159,10 +154,11 @@ const AddPlayer = ({ updatePlayers, player, disabled}: AddPlayerProps) => {
 						Name
 					</label>
 					<div className="bg-white">
-						<TextField size="small" onChange={handleNameChange} value={name} label={player.default ? "Add Player" : player.player_name} variant="outlined"/>
+						<TextField size="small" error={name.length == 0} onChange={handleNameChange} value={name} label={player.default ? "Add Player" : player.player_name} variant="outlined"/>
 					</div>
+
 					<label className="Label" htmlFor="gender">Male:</label>
-					<Switch.Root onCheckedChange={handleGenderChange} defaultChecked={player.gender !== "Male"} className="SwitchRoot" id="gender-switch" >
+					<Switch.Root onCheckedChange={handleGenderChange} defaultChecked={player.gender !== "Male"} className="SwitchRoot">
 						<Switch.Thumb className="SwitchThumb" />
 					</Switch.Root>
 					<label className="Label" htmlFor="gender">Female</label>
@@ -202,9 +198,18 @@ const AddPlayer = ({ updatePlayers, player, disabled}: AddPlayerProps) => {
 					))}
 				</div>
 				<div>
-					<Dialog.Close asChild>
-						<div onClick={checkSubmit} className="bg-cyan-200 w-fit mx-auto p-2 rounded-lg mt-5 hover:bg-cyan-300 transition transition-duration-300 select-none shadow-gray-600 shadow-sm">{player.default ? "Add Player" : "Update Player"}</div>
-					</Dialog.Close>
+					
+					{/* if name is "", cursor changes to disabled and clicks arent allowed, else its normal */}
+					{/* doing it this way means no transition, but cursor disabled looks better i think */}
+					{name.length === 0 ? (
+						<div className={`${name.length === 0 ? "cursor-not-allowed w-fit mx-auto" : ""}`}>
+							<div onClick={checkSubmit} className={`${name.length === 0 ? "pointer-events-none bg-red-300 opacity-50" : ""} bg-cyan-200 w-fit mx-auto p-2 rounded-lg mt-5 hover:bg-cyan-300 transition transition-duration-300 select-none shadow-gray-600 shadow-sm`}>{player.default ? "Add Player" : "Update Player"}</div>
+						</div>
+					) : (
+						<Dialog.Close asChild>
+							<div onClick={checkSubmit} className={`bg-cyan-200 w-fit mx-auto p-2 rounded-lg mt-5 hover:bg-cyan-300 transition transition-duration-300 select-none shadow-gray-600 shadow-sm`}>{player.default ? "Add Player" : "Update Player"}</div>
+						</Dialog.Close>
+					)}
 				</div>
 				<Dialog.Close asChild>
 					<button className="IconButton" aria-label="Close">
