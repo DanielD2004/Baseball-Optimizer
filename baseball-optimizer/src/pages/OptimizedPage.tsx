@@ -28,15 +28,21 @@ interface Schedule {
 }
 
 interface Inning {
-    field: Player[];
-    bench: Player[];
+    field: schedulePlayer[];
+    bench: schedulePlayer[];
+}
+
+interface PositionOption {
+    label: string;
 }
 
 interface Player {
-    id: string;
-    name: string;
-    position: string;
+    player_name: string;
+    team_id: string;
     skill: number;
+    positions: { [key: string]: PositionOption };
+    player_id?: string;
+    default: boolean;
     gender: string;
 }
 
@@ -46,6 +52,11 @@ interface schedulePlayer {
     position?: string;
 } 
 
+interface LocationState {
+    team: Team;
+    isPlaying: { [playerName: string]: boolean };
+}
+
 function OptimizedPage() {
     const innings: string[] = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
     const [loading, setLoading] = useState<boolean>(true);
@@ -53,7 +64,7 @@ function OptimizedPage() {
     const [players, setPlayers] = useState();
     const [importance, setImportance] = useState();
     const location = useLocation();
-    const team: Team = location.state as Team;
+    const { team, isPlaying }= location.state as LocationState;
     const { user } = useUser();
     const navigate = useNavigate();
 
@@ -68,7 +79,8 @@ function OptimizedPage() {
                 });
                 const data = await response.json();
                 if (data) {
-                    setPlayers(data);
+                    const activePlayers = data.filter((player: Player) => isPlaying[player.player_name]);
+                    setPlayers(activePlayers);
                 }
             } catch (err) {
                 console.error(err);

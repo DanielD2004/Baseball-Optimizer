@@ -145,7 +145,7 @@ input {
 }
 
 .SwitchRoot {
-	width: 60px;
+	width: 65px;
 	height: 25px;
 	border: 1px solid black;
 	background-color: var(--black-a6);
@@ -170,6 +170,6 @@ input {
 	transform: translateX(2px);
 	will-change: transform;
 	&[data-state="checked"] {
-		transform: translateX(19px);
+		transform: translateX(95%);
 	}
 }

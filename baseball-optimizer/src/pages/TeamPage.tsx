@@ -3,6 +3,8 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import AddPlayer from '../components/AddPlayer';
 import ImportanceModal from '../components/ImportanceModal';
+import { Switch } from "radix-ui";
+import "./TeamPage.css"
 
 const URL = import.meta.env.VITE_NGROK_URL
 
@@ -43,6 +45,7 @@ interface Importance {
 
 function TeamPage() {
     const [players, setPlayers] = useState<Player[]>([]);
+    const [isPlaying, setIsPlaying] = useState<{[key: string]: boolean}>({})
     const { user } = useUser();
     const navigate = useNavigate();
     const location = useLocation();
@@ -59,6 +62,7 @@ function TeamPage() {
         "RC": 50,
         "RF": 50,
     });
+
 
     const positionOptions: PositionOption[] = [
         { label: "Wants To Play" },
@@ -97,12 +101,29 @@ function TeamPage() {
             const data = await response.json();
             if (data) {
                 setPlayers(data);
+                setPlayersPlaying(data)
             }
         } catch (err) {
             console.error(err);
         }
     };
-    
+
+    const setPlayersPlaying = ((players: Player[]) => {
+        const initialIsPlaying: { [key: string]: boolean } = {}
+        players.forEach((player: Player) => {
+            initialIsPlaying[player.player_name] = true;
+        })
+        setIsPlaying(initialIsPlaying)
+    })
+
+    const handlePlayingChange = ((playerName: string) => {
+        setIsPlaying((prev) => ({
+           
+            ...prev,
+            [playerName]: !prev[playerName]
+        }))}
+    )
+
     const fetchImportance = async () => {
         try {
             const response = await fetch(`${URL}/api/teams/${team.team_id}/importance`, {
@@ -113,7 +134,6 @@ function TeamPage() {
             });
             const data = await response.json();
             if (data) {
-                console.log("Here is the data that were fetched ", data.importance)
                 setImportance(data.importance);
             } else {
                 console.log("No importance data found, using defaults.");
@@ -162,6 +182,9 @@ function TeamPage() {
         fetchImportance();
     }, [user, team]);
 
+    useEffect(() => {
+        console.log(isPlaying)
+    }, [isPlaying])
     return (
         <div className='bg-cyan-50'>
             {team ? (
@@ -176,14 +199,19 @@ function TeamPage() {
                                 <div className="col-span-full flex flex-wrap justify-center gap-4 w-2/3 mx-auto my-auto">
                                     {players.map((player) => (
                                         //player card
-                                        <div className="dark:bg-slate-800 hover:bg-zinc-50 hover:scale-105 transition-discrete duration-100 bg-white px-5 h-80 shadow-md shadow-slate-500 rounded-2xl pt-5" key={player.player_name} >
-                                            <AddPlayer updatePlayers={fetchPlayers} player={player} />
+                                        <div className={`${isPlaying[player.player_name] ? "bg-zinc-100" : "text-white bg-zinc-500 opacity-[.45]"} dark:bg-slate-800 hover:scale-105 transition-discrete duration-300  px-5 h-fit shadow-md shadow-slate-500 rounded-2xl py-5`} key={player.player_name} >
+                                            <AddPlayer playing={isPlaying[player.player_name]} updatePlayers={fetchPlayers} player={player} />
+                                            <div className='flex flex-row gap-3 my-2'>
+                                                <h2>Playing</h2>
+                                                <Switch.Root onCheckedChange={() => handlePlayingChange(player.player_name)} defaultChecked={isPlaying[player.player_name]} className="SwitchRootTeam">
+                                                    <Switch.Thumb className="SwitchThumbTeam" />
+                                                </Switch.Root>
+                                            </div>
                                             {player.positions && Object.entries(player.positions).map(([position, data]) => (
                                                 <div key={position}>
                                                     <strong>{position}:</strong> {data.label}
                                                 </div>
                                             ))}
-                                            <br /><br />
                                         </div>
                                     ))}
                             </div>
@@ -198,7 +226,7 @@ function TeamPage() {
             )}
             <div className='sticky flex flex-col gap-4 items-center pb-20 md:flex-row md:justify-center'>
                 <AddPlayer disabled={players.length >= 15} key={players.length} updatePlayers={fetchPlayers} player={defaultPlayer} />
-                <Link to={`/teams/${team.team_name}/${team.season}/optimized`} state={team}>
+                <Link to={`/teams/${team.team_name}/${team.season}/optimized`} state={{team, isPlaying}}>
                     <div className="w-3xs bg-violet-300 border-2 rounded-md justify-center px-2 py-1 inline-flex h-20 select-none cursor-pointer items-center hover:bg-violet-300 transition duration-300">
                         Generate Lineup
                     </div>
