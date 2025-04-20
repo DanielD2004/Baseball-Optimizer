@@ -38,6 +38,7 @@ Full-stack web app that optimizes slowpitch softball defensive lineups based on 
 - I'd like to add a scoresheet in the future, that uses the row order from the defensive lineup
 - Enhance UI
 - Cleanup code
+- Add a guest mode
 - Add more accessibility features
 
   
