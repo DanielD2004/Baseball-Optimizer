@@ -28,8 +28,8 @@ interface Schedule {
 }
 
 interface Inning {
-    field: Player[];
-    bench: Player[];
+    field: schedulePlayer[];
+    bench: schedulePlayer[];
 }
 
 interface PositionOption {
@@ -52,6 +52,11 @@ interface schedulePlayer {
     position?: string;
 } 
 
+interface LocationState {
+    team: Team;
+    isPlaying: { [playerName: string]: boolean };
+}
+
 function OptimizedPage() {
     const innings: string[] = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
     const [loading, setLoading] = useState<boolean>(true);
@@ -59,7 +64,7 @@ function OptimizedPage() {
     const [players, setPlayers] = useState();
     const [importance, setImportance] = useState();
     const location = useLocation();
-    const { team, isPlaying } = location.state;
+    const { team, isPlaying }= location.state as LocationState;
     const { user } = useUser();
     const navigate = useNavigate();
 

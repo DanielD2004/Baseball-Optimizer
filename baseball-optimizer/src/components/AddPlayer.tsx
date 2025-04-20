@@ -115,7 +115,7 @@ const AddPlayer = ({ updatePlayers, player, disabled, playing}: AddPlayerProps) 
     		  updatePlayers();
     	}
 
-	const checkSubmit = (e: React.MouseEvent<HTMLDivElement>) => {
+	const checkSubmit = () => {
 		if(player.default) {
 			AddPlayer();
 			return
