@@ -119,16 +119,22 @@ function OptimizedPage() {
             const data = await response.json();
             const processedData = getPlayerPositionsByInning(data)
             setResult(processedData);
-            setRowOrder(Object.keys(processedData))
-            sessionStorage.setItem("rowOrder", JSON.stringify(Object.keys(processedData)))
             setLoading(false);
+            const sessionRowOrder = sessionStorage.getItem("rowOrder");
+            if (sessionRowOrder){
+                setRowOrder(JSON.parse(sessionRowOrder))
+            }
+            else{
+                setRowOrder(Object.keys(processedData))
+                sessionStorage.setItem("rowOrder", JSON.stringify(Object.keys(processedData)))
+            }
         } catch (err) {
             console.error(err);
             setResult(null);
         }
     }
 
-    
+    // Id like to revisist this in the future
     function getPlayerPositionsByInning(schedule: Schedule) {
         const playerPositionsByInning: { [playerName: string]: string[] } = {};
         const innings = 9;
@@ -145,19 +151,19 @@ function OptimizedPage() {
             inning.field.forEach((player: schedulePlayer) => {
                 if (!playerPositionsByInning[player.name]) {
                     playerPositionsByInning[player.name] = Array(innings).fill("X");
-            }
-        });
-    }
-    // fill in proper positions
-    for (const inningNum in schedule.schedule) {
-        const inning = schedule.schedule[inningNum];
-        const indexPosition = parseInt(inningNum) - 1; // convert to 0 index
-        
-        // set field positions
-        inning.field.forEach((player: schedulePlayer) => {
-            // access object through player name and update position array accordingly
-            playerPositionsByInning[player.name][indexPosition] = player.position ?? "X";
-        });
+                }
+            });
+        }
+        // fill in proper positions
+        for (const inningNum in schedule.schedule) {
+            const inning = schedule.schedule[inningNum];
+            const indexPosition = parseInt(inningNum) - 1; // convert to 0 index
+            
+            // set field positions
+            inning.field.forEach((player: schedulePlayer) => {
+                // access object through player name and update position array accordingly
+                playerPositionsByInning[player.name][indexPosition] = player.position ?? "X";
+            });
         }
         return playerPositionsByInning;
     }
@@ -179,6 +185,7 @@ function OptimizedPage() {
             }
         })
     }
+
     useEffect(() => {
         fetchPlayers();
         fetchImportance();
@@ -204,7 +211,7 @@ function OptimizedPage() {
     }, [players, importance]);
 
       return (
-        <div className='bg-cyan-50'>
+        <div className='bg-cyan-50 -mt-8'>
             {loading ? (
                 <div className="h-screen -mt-20 flex flex-col justify-center items-center" >
                     <Ring size="75"></Ring>
