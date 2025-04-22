@@ -15,6 +15,8 @@ interface Team {
   division: string;
   }
 
+
+
 const Teams = () => {
     const { user } = useUser() 
     const [division, setDivision] = useState<string>('');
@@ -29,12 +31,12 @@ const Teams = () => {
         headers: {
         'Content-Type': 'application/json',
         }
-    })
-    const data = await response.json();
-    setTeams(data);
-    } catch (error) {
-        console.error('Error fetching teams:', error);
-      } 
+      })
+      const data = await response.json();
+      setTeams(data);
+      } catch (error) {
+          console.error('Error fetching teams:', error);
+        } 
     }
 
   const addTeam = async() => {
@@ -55,7 +57,21 @@ const Teams = () => {
       fetchTeams(user.id);
     }
   }
-  
+
+  const deleteTeam = async (team: Team) => {
+      if (user){
+        try {
+            const response = await fetch(`${URL}/api/teams/${team.team_id}/Team`, {
+                method: 'DELETE'                
+            })
+            await response.json()
+            fetchTeams(user.id);
+        } catch (e) {
+            console.error(e)
+        }
+    }
+  }
+
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTeamName(e.target.value);
   }
@@ -76,7 +92,7 @@ const Teams = () => {
           // y space between children
           <div className="space-y-6 flex min-w-1/2 max-w-100 mx-auto flex-wrap">
             {teams.map((team) => (
-              <TeamCard key={team.team_id} team={team} />
+              <TeamCard key={team.team_id} deleteTeam={deleteTeam} team={team} />
             ))}
           </div>
         ) : (

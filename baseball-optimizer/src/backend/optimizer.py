@@ -499,6 +499,21 @@ def optimize(team_id):
             "details": str(e)
         }), 500
 
+@app.route('/api/teams/<id>/<type>', methods=['DELETE'])
+def delete(id, type):
+    try:
+        if type == "Player":
+            result = db.Players.delete_one(
+                {"player_id": id}
+            )
+        elif type == "Team":
+            result = db.Teams.delete_one(
+                {"team_id": id}
+            )
+        return jsonify("Player Deleted"), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/ping')
 def ping():
     return 'pong'

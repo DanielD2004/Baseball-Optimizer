@@ -223,7 +223,7 @@ function OptimizedPage() {
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell align="center" sx={{fontWeight: 'bold'}}>Name</TableCell>
+                                    <TableCell align="center" className='w-1/6' sx={{fontWeight: 'bold'}}>Name</TableCell>
                                     {/* fill out top row */}
                                     {innings.map((inning) => (
                                         <TableCell sx={{fontWeight: 'bold'}} key={inning} align="center">
@@ -240,10 +240,10 @@ function OptimizedPage() {
                                     return (
                                         <TableRow key={playerName}>
                                             <TableCell>
-                                                <div className='flex flex-row gap-3 w-fit font-bold mx-auto'>
-                                                    <h2 className='select-none mt-1 mr-5'>{playerName}</h2>
+                                                <div className='flex flex-row w-1/2 font-bold mx-auto gap-3'>
+                                                    <h2 className='select-none w-30 text-center -ml-10 mt-1 '>{playerName}</h2>
                                                     <div onClick={() => moveRow(index, "up")} className='select-none cursor-pointer bg-gray-200 p-1 w-15 text-center rounded-lg border-black border-1'>Up</div>
-                                                    <div onClick={() => moveRow(index, "down")} className='select-none cursor-pointer bg-gray-200 p-1 w-15 text-center rounded-lg border-black border-1'>Down</div>
+                                                    <div onClick={() => moveRow(index, "down")} className='select-none cursor-pointer bg-gray-200 p-1 w-15 text-center rounded-lg border-black border-1 -mr-10'>Down</div>
                                                 </div>
                                             </TableCell>
                                             {positions.map((position, i) => (

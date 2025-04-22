@@ -5,6 +5,7 @@ import AddPlayer from '../components/AddPlayer';
 import ImportanceModal from '../components/ImportanceModal';
 import { Switch } from "radix-ui";
 import "./TeamPage.css"
+import { TrashIcon } from '@radix-ui/react-icons';
 
 const URL = import.meta.env.VITE_NGROK_URL
 
@@ -169,6 +170,18 @@ function TeamPage() {
         }
     };
 
+    const deletePlayer = async (player: Player) => {
+        try {
+            const response = await fetch(`${URL}/api/teams/${player.player_id}/Player`, {
+                method: 'DELETE'                
+            })
+            await response.json()
+            fetchPlayers()
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
     useEffect(() => {
         if (!team || !user) {
             navigate('/');
@@ -182,9 +195,6 @@ function TeamPage() {
         fetchImportance();
     }, [user, team]);
 
-    useEffect(() => {
-        console.log(isPlaying)
-    }, [isPlaying])
     return (
         <div className='bg-cyan-50'>
             {team ? (
@@ -200,7 +210,10 @@ function TeamPage() {
                                     {players.map((player) => (
                                         //player card
                                         <div className={`${isPlaying[player.player_name] ? "bg-zinc-100" : "text-white bg-zinc-500 opacity-[.45]"} dark:bg-slate-800 hover:scale-105 transition-discrete duration-300  px-5 h-fit shadow-md shadow-slate-500 rounded-2xl py-5`} key={player.player_name} >
-                                            <AddPlayer playing={isPlaying[player.player_name]} updatePlayers={fetchPlayers} player={player} />
+                                            <div className='items-center justify-around flex flex-row gap-2 mb-3'>
+                                                <AddPlayer playing={isPlaying[player.player_name]} updatePlayers={fetchPlayers} player={player} />
+                                                <div onClick={() => {deletePlayer(player)}} className='cursor-pointer w-fit rounded-xl bg-gray-300 hover:bg-gray-200 hover:border-gray-500 border-gray-800 border-1 py-2'><TrashIcon className='w-fit h-7'/></div>
+                                            </div>
                                             <div className='flex flex-row gap-3 my-2'>
                                                 <h2>Playing</h2>
                                                 <Switch.Root onCheckedChange={() => handlePlayingChange(player.player_name)} defaultChecked={isPlaying[player.player_name]} className="SwitchRootTeam">
@@ -215,7 +228,7 @@ function TeamPage() {
                                         </div>
                                     ))}
                             </div>
-                    ): 
+                    ):  
                     <div className='font-mono font-black text-5xl mt-70'>No Players On This Team Yet</div>
                     }
                     <br />
