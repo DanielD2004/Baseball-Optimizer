@@ -110,6 +110,7 @@ function OptimizedPage() {
 
     const getLineup = async () => {
         try {
+            sessionStorage.removeItem("rowOrder");
             const response = await fetch(`${URL}/api/teams/${team.team_id}/lineup`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
