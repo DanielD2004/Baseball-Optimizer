@@ -150,7 +150,7 @@ const AddPlayer = ({ updatePlayers, player, disabled, playing}: AddPlayerProps) 
 				</Dialog.Description>
 
 				<fieldset className="Fieldset">
-					<label className="Label" htmlFor="name">
+					<label className="Label select-none" htmlFor="name">
 						Name
 					</label>
 					<div className="bg-white">

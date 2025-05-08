@@ -116,5 +116,3 @@ const Teams = () => {
 };
 
 export default Teams;
-
-// className={`${name.length === 0 ? "pointer-events-none bg-red-300 opacity-50" : ""} bg-cyan-200 w-fit mx-auto p-2 rounded-lg mt-5 hover:bg-cyan-300 transition transition-duration-300 select-none shadow-gray-600 shadow-sm`}

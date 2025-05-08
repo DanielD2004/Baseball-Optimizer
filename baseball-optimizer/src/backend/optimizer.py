@@ -3,7 +3,7 @@ import os
 import pulp as pl
 from flask_cors import CORS
 from tabulate import tabulate
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, session
 import logging
 import time
 from pymongo import MongoClient
@@ -111,15 +111,15 @@ def optimize_softball_lineup(team_data):
 
                 # Calculate coefficient based on preference level:
                 if preference == "wants to play":
-                    coef = 5 * skill + 5 * pos_importance  # Strong preference - heavily reward
+                    coef = 100 * .3 + (((skill * 20) * (pos_importance)/100) * .7)  # Strong preference - heavily reward
                 elif preference == "can play":
-                    coef = 2 * skill + 2 * pos_importance  # Moderate preference - moderately reward
+                    coef = 50 * .3 + (((skill * 20) * (pos_importance)/100) * .7)  # Moderate preference - moderately reward
                 elif preference == "cannot play":
                     coef = -1000  # Strong negative - heavily penalize (will also be enforced by constraint)
 
-                print(p["player_name"])
-                print(pos)
-                print(coef)
+                # print(p["player_name"])
+                # print(pos)
+                # print(coef)
                 # Add term to objective function with appropriate weight
                 obj_terms.append(coef * playerPosition[(player_id, i, pos)])
 
@@ -259,7 +259,7 @@ def optimize_softball_lineup(team_data):
     
     # Solve the linear programming problem with error handling
     try:
-        prob.solve(pl.PULP_CBC_CMD(msg=False))  # Use CBC solver without verbose output
+        prob.solve(pl.PULP_CBC_CMD(msg=False, options=["maxSeconds=10"]))  # Use CBC solver without verbose output
     except Exception as e:
         err_msg = f"Error during optimization: {str(e)}"
         app.logger.error(err_msg)
@@ -319,16 +319,42 @@ def optimize_softball_lineup(team_data):
         "sit_pattern": sit_pattern     # Which innings each player sits out
     }
 
+auth_users = [
+    'daniel.r.duclos@gmail.com',
+    'greg.duclos@gmail.com'
+]
+
 @app.route('/')
 def index():
     return """
     <h1>Yo</h1>
     """
 
+# Add a user
+@app.route("/api/users", methods=["POST"])
+def addUser():
+    data = request.json
+    if data['user_id'] not in auth_users:
+        return jsonify("user is not authorized"), 437
+    else:
+        try:
+            result = db.Users.update_one(
+                {"user_id": data["user_id"],
+                "full_name": data["full_name"],
+                "email": data["email"]             
+                },
+                {
+                    "$set": data
+                },
+                upsert=True
+            )
+            return jsonify({"matched": result.matched_count, "modified": result.modified_count}), 200
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
 # Get all teams for a user
 @app.route("/api/teams/<user_id>", methods=["GET"])
 def getTeams(user_id):
-    get_teams_start_time = time.time()
     if not user_id:
         return jsonify({"error": "No user id"}), 400
     try:
@@ -336,45 +362,10 @@ def getTeams(user_id):
         for team in teams:
             # mongodb stores _id as ObjectID
             team["_id"] = str(team["_id"])
-        get_teams_end_time = time.time()
-        processing_time = get_teams_end_time - get_teams_start_time
-        app.logger.debug(f"getTeams Processing Time: {processing_time:.4f} seconds")
         return jsonify(teams), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# # Get all teams for a user
-# @app.route("/api/teams/<user_id>", methods=["GET"])
-# def getTeams(user_id):
-#     if not user_id:
-#         return jsonify({"error": "No user id"}), 400
-#     try:
-#         teams = list(db.Teams.find({"user_id": user_id}))
-#         for team in teams:
-#             # mongodb stores _id as ObjectID
-#             team["_id"] = str(team["_id"])
-#         return jsonify(teams), 200
-#     except Exception as e:
-#         return jsonify({"error": str(e)}), 500
-
-# Add a user
-@app.route("/api/users", methods=["POST"])
-def addUser():
-    data = request.json
-    try:
-        result = db.Users.update_one(
-            {"user_id": data["user_id"],
-             "full_name": data["full_name"],
-             "email": data["email"]             
-             },
-            {
-                "$set": data
-            },
-            upsert=True
-        )
-        return jsonify({"matched": result.matched_count, "modified": result.modified_count}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 # Add a team
 @app.route("/api/teams", methods=["POST"])
