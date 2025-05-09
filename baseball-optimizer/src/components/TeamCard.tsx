@@ -17,8 +17,7 @@ interface TeamCardProps {
 const TeamCard = ({ team, deleteTeam }: TeamCardProps) => {
   return (
     <Link
-          to={`/teams/${team.team_name}/${team.season}`}
-          state={team}
+          to={`/teams/${team.team_id}`}
           className="w-full max-w-md mx-auto"
     >
       <div className="dark:bg-slate-800 hover:bg-zinc-50 hover:scale-105 transition-discrete duration-100 bg-white w-full max-w-md shadow-md shadow-slate-500 rounded-2xl py-5 px-6 items-center flex flex-col"> 

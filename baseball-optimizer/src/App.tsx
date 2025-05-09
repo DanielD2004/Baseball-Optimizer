@@ -1,34 +1,33 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { SignedIn, SignedOut, SignInButton, SignUpButton, useUser } from '@clerk/clerk-react'
+import { SignedIn, SignedOut, SignInButton, SignUpButton, useUser, useAuth } from '@clerk/clerk-react'
 import Teams from './pages/Teams.tsx'
 import Header from './components/Header.tsx'
 import TeamPage from './pages/TeamPage.tsx'
 import OptimizedPage from './pages/OptimizedPage.tsx'
+import MePage from './pages/MePage.tsx'
 import './App.css'
 
 const URL = import.meta.env.VITE_NGROK_URL
 
 function App() {
+  const { getToken } = useAuth();
   const { user } = useUser()
-
-  const addUser = async() => {
+  
+  const login = async() => {
+    const token = await getToken({ template: "Test" });
     if (!user){
       return;
     }
     else {
       try{
-        const data = {
-          "user_id": user.id,
-          "full_name": user.fullName, 
-          "email": user.emailAddresses[0].emailAddress,
-        }
         const response = await fetch(`${URL}/api/users`, {
         method: 'POST',
         headers: {
-        'Content-Type': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(data)
+        credentials: 'include'
       });
       await response.json();
       } catch (error) {
@@ -39,7 +38,7 @@ function App() {
 
   useEffect(() => {
     if (user){
-      addUser()
+      login()
     }
   }, [user])
 
@@ -65,8 +64,9 @@ function App() {
         <Header/>
         <Routes>
             <Route path="/" element={<Teams/>}/>
-            <Route path='/teams/:teamName/:season' element={<TeamPage/>}/>
-            <Route path='/teams/:teamName/:season/optimized' element={<OptimizedPage/>}/>
+            <Route path='/teams/:teamId' element={<TeamPage/>}/>
+            <Route path='/teams/:teamId/optimized' element={<OptimizedPage/>}/>
+            <Route path='/me' element={<MePage/>}/>
         </Routes>
       </SignedIn>
     </BrowserRouter>

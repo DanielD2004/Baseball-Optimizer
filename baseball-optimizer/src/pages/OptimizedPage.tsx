@@ -65,7 +65,7 @@ function OptimizedPage() {
     const [players, setPlayers] = useState();
     const [importance, setImportance] = useState();
     const location = useLocation();
-    const { team, isPlaying }= location.state as LocationState;
+    const { team, isPlaying } = location.state as LocationState;
     const { user } = useUser();
     const navigate = useNavigate();
 

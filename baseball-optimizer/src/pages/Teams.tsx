@@ -26,7 +26,7 @@ const Teams = () => {
 
     const fetchTeams = async(userID: string) => {
       try{
-        const response = await fetch(`${URL}/api/teams/${userID}`, {
+        const response = await fetch(`${URL}/api/teams/user/${userID}`, {
         method: 'GET',
         headers: {
         'Content-Type': 'application/json',

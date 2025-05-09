@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useParams } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import AddPlayer from '../components/AddPlayer';
 import ImportanceModal from '../components/ImportanceModal';
@@ -45,12 +45,13 @@ interface Importance {
 }
 
 function TeamPage() {
+    const [team, setTeam] = useState<Team | null>(null);
     const [players, setPlayers] = useState<Player[]>([]);
     const [isPlaying, setIsPlaying] = useState<{[key: string]: boolean}>({})
     const { user } = useUser();
     const navigate = useNavigate();
-    const location = useLocation();
-    const team: Team = location.state as Team;
+    const { teamId } = useParams<{ teamId: string }>(); 
+
     const [importance, setImportance] = useState<Importance>({
         "1B": 50,
         "2B": 50,
@@ -64,36 +65,29 @@ function TeamPage() {
         "RF": 50,
     });
 
-
     const positionOptions: PositionOption[] = [
         { label: "Wants To Play" },
         { label: "Can Play" },
         { label: "Cannot Play" }
     ];
 
-    const defaultPlayer: Player = {
-        player_name: "",
-        team_id: team.team_id,
-        skill: 2.5,
-        positions: {
-            "1B": positionOptions[2],
-            "2B": positionOptions[2],
-            "3B": positionOptions[2],
-            "SS": positionOptions[2],
-            "P": positionOptions[2],
-            "C": positionOptions[2],
-            "LF": positionOptions[2],
-            "LC": positionOptions[2],
-            "RC": positionOptions[2],
-            "RF": positionOptions[2],
-        },
-        default: true,
-        gender: "Male"
-    };
+    let defaultPlayer: Player | null = null;
+    if (teamId) {
+        defaultPlayer = {
+            player_name: "",
+            team_id: teamId,
+            skill: 2.5,
+            positions: Object.fromEntries(
+                ["1B", "2B", "3B", "SS", "P", "C", "LF", "LC", "RC", "RF"].map(pos => [pos, positionOptions[2]])
+            ),
+            default: true,
+            gender: "Male"
+        };
+    }
 
     const fetchPlayers = async () => {
         try {
-            const response = await fetch(`${URL}/api/teams/${team.team_id}/players`, {
+            const response = await fetch(`${URL}/api/teams/${teamId}/players`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -119,15 +113,14 @@ function TeamPage() {
 
     const handlePlayingChange = ((playerName: string) => {
         setIsPlaying((prev) => ({
-           
             ...prev,
             [playerName]: !prev[playerName]
-        }))}
-    )
+        }))
+    })
 
     const fetchImportance = async () => {
         try {
-            const response = await fetch(`${URL}/api/teams/${team.team_id}/importance`, {
+            const response = await fetch(`${URL}/api/teams/${teamId}/importance`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -146,7 +139,7 @@ function TeamPage() {
 
     const updateImportance = async (newImportance: Importance) => {
         try {
-            const response = await fetch(`${URL}/api/teams/${team.team_id}/importance`, {
+            const response = await fetch(`${URL}/api/teams/${teamId}/importance`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -164,7 +157,7 @@ function TeamPage() {
 
             const result = await response.json();
             console.log(result);
-           fetchImportance();
+            fetchImportance();
         } catch (err) {
             console.error(err);
         }
@@ -183,63 +176,83 @@ function TeamPage() {
     }
 
     useEffect(() => {
-        if (!team || !user) {
-            navigate('/');
-            return;
+        const fetchTeam = async () => {
+            try {
+                const res = await fetch(`${URL}/api/teams/${teamId}`);
+                const teamObj = await res.json();
+                if (teamObj && user && teamObj.user_id === user.id) {
+                    setTeam(teamObj);
+                } else {
+                    navigate('/');
+                }
+            } catch (err) {
+                console.error(err);
+                navigate('/');
+            }
         }
-        if (user && team && team.user_id !== user.id) {
-            navigate('/');
-        }
+        const fetchAll = async () => {
+        try {
+            // waits for all promises to finish before moving on
+            await Promise.all([
+                fetchTeam(),
+                fetchPlayers(),
+                fetchImportance()
+                ]);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
 
-        fetchPlayers();
-        fetchImportance();
-    }, [user, team]);
+        if (user && teamId) {
+            fetchAll();
+        }
+    }, [user, teamId]);
 
     return (
         <div className='bg-cyan-50'>
             {team ? (
                 <>
                     <div className="-mt-15">
-                        <p className=" mx-auto w-fit cursor-pointer dark:text-white mb-1 text-slate-600 uppercase text-4xl md:text-7xl font-bold font-mono text-center tracking-wide text-shadow-slate-300 text-shadow-lg dark:text-shadow-2xl dark:text-shadow-black" /* to={`/teams/${team.team_name}/${team.season}/optimized`} state={team}*/>
-                        {team.team_name} 
+                        <p className=" mx-auto w-fit cursor-pointer dark:text-white mb-1 text-slate-600 uppercase text-4xl md:text-7xl font-bold font-mono text-center tracking-wide text-shadow-slate-300 text-shadow-lg dark:text-shadow-2xl dark:text-shadow-black">
+                            {team.team_name} 
                         </p> 
                     </div>
                     <hr className='border-1 mb-4'/>
                     {players.length > 0 ? (
-                                <div className="col-span-full flex flex-wrap justify-center gap-4 w-2/3 mx-auto my-auto">
-                                    {players.map((player) => (
-                                        //player card
-                                        <div className={`${isPlaying[player.player_name] ? "bg-zinc-100" : "text-white bg-zinc-500 opacity-[.45]"} dark:bg-slate-800 hover:scale-105 transition-discrete duration-300  px-5 h-fit shadow-md shadow-slate-500 rounded-2xl py-5`} key={player.player_name} >
-                                            <div className='items-center justify-around flex flex-row gap-2 mb-3'>
-                                                <AddPlayer playing={isPlaying[player.player_name]} updatePlayers={fetchPlayers} player={player} />
-                                                <div onClick={() => {deletePlayer(player)}} className='cursor-pointer w-fit rounded-xl bg-gray-300 hover:bg-gray-200 hover:border-gray-500 border-gray-800 border-1 py-2'><TrashIcon className='w-fit h-7'/></div>
-                                            </div>
-                                            <div className='flex flex-row gap-3 my-2'>
-                                                <h2>Playing</h2>
-                                                <Switch.Root onCheckedChange={() => handlePlayingChange(player.player_name)} defaultChecked={isPlaying[player.player_name]} className="SwitchRootTeam">
-                                                    <Switch.Thumb className="SwitchThumbTeam" />
-                                                </Switch.Root>
-                                            </div>
-                                            {player.positions && Object.entries(player.positions).map(([position, data]) => (
-                                                <div key={position}>
-                                                    <strong>{position}:</strong> {data.label}
-                                                </div>
-                                            ))}
+                        <div className="col-span-full flex flex-wrap justify-center gap-4 w-2/3 mx-auto my-auto">
+                            {players.map((player) => (
+                                <div className={`${isPlaying[player.player_name] ? "bg-zinc-100" : "text-white bg-zinc-500 opacity-[.45]"} dark:bg-slate-800 hover:scale-105 transition-discrete duration-300  px-5 h-fit shadow-md shadow-slate-500 rounded-2xl py-5`} key={player.player_name} >
+                                    <div className='items-center justify-around flex flex-row gap-2 mb-3'>
+                                        <AddPlayer playing={isPlaying[player.player_name]} updatePlayers={fetchPlayers} player={player} />
+                                        <div onClick={() => {deletePlayer(player)}} className='cursor-pointer w-fit rounded-xl bg-gray-300 hover:bg-gray-200 hover:border-gray-500 border-gray-800 border-1 py-2'><TrashIcon className='w-fit h-7'/></div>
+                                    </div>
+                                    <div className='flex flex-row gap-3 my-2'>
+                                        <h2>Playing</h2>
+                                        <Switch.Root onCheckedChange={() => handlePlayingChange(player.player_name)} defaultChecked={isPlaying[player.player_name]} className="SwitchRootTeam">
+                                            <Switch.Thumb className="SwitchThumbTeam" />
+                                        </Switch.Root>
+                                    </div>
+                                    {player.positions && Object.entries(player.positions).map(([position, data]) => (
+                                        <div key={position}>
+                                            <strong>{position}:</strong> {data.label}
                                         </div>
                                     ))}
-                            </div>
-                    ):  
+                                </div>
+                            ))}
+                        </div>
+                    ) :  
                     <div className='font-mono font-black text-5xl mt-70'>No Players On This Team Yet</div>
                     }
                     <br />
-                    
                 </>
             ) : (
                 <h2>No data</h2>
             )}
             <div className='sticky flex flex-col gap-4 items-center pb-20 md:flex-row md:justify-center'>
-                <AddPlayer playing={true} disabled={players.length >= 15} key={players.length} updatePlayers={fetchPlayers} player={defaultPlayer} />
-                <Link to={`/teams/${team.team_name}/${team.season}/optimized`} state={{team, isPlaying}}>
+                {defaultPlayer && (
+                    <AddPlayer playing={true} disabled={players.length >= 15} key={players.length} updatePlayers={fetchPlayers} player={defaultPlayer}/>
+                )}
+                <Link to={`/teams/${teamId}/optimized`} state={{team, isPlaying}}>
                     <div className="w-3xs bg-violet-300 border-2 rounded-md justify-center px-2 py-1 inline-flex h-20 select-none cursor-pointer items-center hover:bg-violet-300 transition duration-300">
                         Generate Lineup
                     </div>

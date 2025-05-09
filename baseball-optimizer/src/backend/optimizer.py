@@ -3,21 +3,31 @@ import os
 import pulp as pl
 from flask_cors import CORS
 from tabulate import tabulate
-from flask import Flask, request, jsonify, session
+from flask import Flask, request, jsonify, session, render_template, make_response
 import logging
 import time
 from pymongo import MongoClient
 from bson import ObjectId
-from dotenv import dotenv_values
+from dotenv import load_dotenv
 from pymongo.server_api import ServerApi
 import os
 import requests
+from clerk_backend_api import Clerk
+from clerk_backend_api.jwks_helpers import authenticate_request, AuthenticateRequestOptions
+import httpx
 
-config = dotenv_values(".env")
+load_dotenv()
 app = Flask(__name__)
-CORS(app)
 
-uri = config.get("MONGO_URI")
+# otherwise, blocks cookie from frontend
+app.config.update(
+    SESSION_COOKIE_SAMESITE='None',
+    SESSION_COOKIE_SECURE=True
+)
+app.secret_key = os.urandom(24)
+CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
+clerk_sdk = Clerk(bearer_auth=os.getenv("CLERK_SECRET_KEY"))
+uri = os.getenv("MONGO_URI")
 client = MongoClient(uri, server_api=ServerApi('1'))
 db = client["Optimizer"]
 
@@ -26,8 +36,6 @@ try:
     print("Pinged your deployment. You successfully connected to MongoDB!")
 except Exception as e:
     print(e)
-# Enable detailed logging for debugging
-# logging.basicConfig(level=logging.DEBUG)
 
 def optimize_softball_lineup(team_data):
     """
@@ -324,6 +332,20 @@ auth_users = [
     'greg.duclos@gmail.com'
 ]
 
+def get_authenticated_user(flask_request):
+    # Convert Flask request to httpx.Request
+    req = httpx.Request(
+        method=request.method,
+        url=request.url,
+        headers=request.headers
+    )
+    return clerk_sdk.authenticate_request(
+        req,
+        AuthenticateRequestOptions(
+            authorized_parties=["http://localhost:5173"]  # Your frontend origin
+        )
+    )
+
 @app.route('/')
 def index():
     return """
@@ -332,28 +354,41 @@ def index():
 
 # Add a user
 @app.route("/api/users", methods=["POST"])
-def addUser():
-    data = request.json
-    if data['user_id'] not in auth_users:
-        return jsonify("user is not authorized"), 437
+def login():
+    result = get_authenticated_user(request)
+
+    if not result.is_signed_in:
+        return jsonify({"error": "unauthorized"}), 401
+    
+    user_id = result.payload.get("sub")
+    email = result.payload.get("email")
+    full_name = result.payload.get("name")
+    
+    if email not in auth_users:
+        return jsonify("User is not authorized"), 437
     else:
         try:
             result = db.Users.update_one(
-                {"user_id": data["user_id"],
-                "full_name": data["full_name"],
-                "email": data["email"]             
-                },
+                {"user_id": user_id},
                 {
-                    "$set": data
-                },
+                    "$set": {
+                        "user_id": user_id,
+                        "full_name": full_name,
+                        "email": email
+                    }},
                 upsert=True
             )
+            app.logger.debug("I AM MAKING A SESSION")
+            session["user_id"] = user_id
+            session["guest_mode"] = email not in auth_users
+
             return jsonify({"matched": result.matched_count, "modified": result.modified_count}), 200
         except Exception as e:
+            app.logger.info(e)
             return jsonify({"error": str(e)}), 500
 
 # Get all teams for a user
-@app.route("/api/teams/<user_id>", methods=["GET"])
+@app.route("/api/teams/user/<user_id>", methods=["GET"])
 def getTeams(user_id):
     if not user_id:
         return jsonify({"error": "No user id"}), 400
@@ -366,6 +401,19 @@ def getTeams(user_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Get one team by team_id
+@app.route("/api/teams/<team_id>", methods=["GET"])
+def get_team_by_id(team_id):
+    if not team_id:
+        return jsonify({"error": "No team id"}), 400
+    try:
+        team = db.Teams.find_one({"team_id": team_id})
+        if not team:
+            return jsonify({"error": "Team not found"}), 404
+        team["_id"] = str(team["_id"])  # Make _id JSON serializable
+        return jsonify(team), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # Add a team
 @app.route("/api/teams", methods=["POST"])
@@ -506,6 +554,21 @@ def delete(id, type):
 @app.route('/ping')
 def ping():
     return 'pong'
+
+@app.route('/api/me', methods=['GET'])
+def me():
+    app.logger.debug(f"Session contents: {dict(session)}")
+
+    user_id = session.get("user_id")
+    guest = session.get("guest_mode")
+
+    if not user_id:
+        return jsonify({"error": "Not logged in"}), 4014
+
+    return f"<h1>{user_id}</h1><br/><h1>{guest}</h1>"
+
+
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
