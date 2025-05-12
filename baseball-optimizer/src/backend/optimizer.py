@@ -24,7 +24,7 @@ app.config.update(
     SESSION_COOKIE_SAMESITE='None',
     SESSION_COOKIE_SECURE=True
 )
-app.secret_key = os.urandom(24)
+app.secret_key = os.getenv("FLASK_SECRET_KEY")
 CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
 clerk_sdk = Clerk(bearer_auth=os.getenv("CLERK_SECRET_KEY"))
 uri = os.getenv("MONGO_URI")
@@ -364,32 +364,34 @@ def login():
     email = result.payload.get("email")
     full_name = result.payload.get("name")
     
-    if email not in auth_users:
-        return jsonify("User is not authorized"), 437
-    else:
-        try:
-            result = db.Users.update_one(
-                {"user_id": user_id},
-                {
-                    "$set": {
-                        "user_id": user_id,
-                        "full_name": full_name,
-                        "email": email
-                    }},
-                upsert=True
-            )
-            app.logger.debug("I AM MAKING A SESSION")
-            session["user_id"] = user_id
-            session["guest_mode"] = email not in auth_users
+    try:
+        session.clear()
+        result = db.Users.update_one(
+            {"user_id": user_id},
+            {
+                "$set": {
+                    "user_id": user_id,
+                    "full_name": full_name,
+                    "email": email
+                }},
+            upsert=True
+        )
+        
+        session["user_id"] = user_id
+        session["guest_mode"] = email not in auth_users
 
-            return jsonify({"matched": result.matched_count, "modified": result.modified_count}), 200
-        except Exception as e:
-            app.logger.info(e)
-            return jsonify({"error": str(e)}), 500
+        if email not in auth_users:
+                return jsonify("User is in guest mode"), 200
+        
+        return jsonify({"matched": result.matched_count, "modified": result.modified_count}), 200
+    except Exception as e:
+        app.logger.info(e)
+        return jsonify({"error": str(e)}), 500
 
 # Get all teams for a user
-@app.route("/api/teams/user/<user_id>", methods=["GET"])
-def getTeams(user_id):
+@app.route("/api/teams/user/", methods=["GET"])
+def getTeams():
+    user_id = session.get("user_id")
     if not user_id:
         return jsonify({"error": "No user id"}), 400
     try:
@@ -418,7 +420,11 @@ def get_team_by_id(team_id):
 # Add a team
 @app.route("/api/teams", methods=["POST"])
 def addTeam():
+    user_id = session.get("user_id")
     data = request.json
+    data["user_id"] = user_id
+    if not user_id:
+        return jsonify({"error": "No user id"}), 400
     try:
         result = db.Teams.update_one(
             {
@@ -503,7 +509,7 @@ def setImportance(team_id):
     data["team_id"] = team_id
     try:
         result = db.Position_Importance.update_one(
-            {"team_id": team_id, "user_id": data["user_id"]},
+            {"team_id": team_id},
             {"$set": data},
             upsert=True
         )
@@ -526,7 +532,6 @@ def getImportance(team_id):
 def optimize(team_id):
     data = request.json
     try:
-        
         result = optimize_softball_lineup(data)
         return jsonify(result), 200
         
@@ -558,17 +563,17 @@ def ping():
 @app.route('/api/me', methods=['GET'])
 def me():
     app.logger.debug(f"Session contents: {dict(session)}")
-
     user_id = session.get("user_id")
     guest = session.get("guest_mode")
-
     if not user_id:
         return jsonify({"error": "Not logged in"}), 4014
 
     return f"<h1>{user_id}</h1><br/><h1>{guest}</h1>"
 
-
-
+@app.route("/api/logout", methods=["POST"])
+def logout():
+    session.clear()
+    return jsonify({"message": "Logged out"}), 200
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

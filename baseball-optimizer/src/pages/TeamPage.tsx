@@ -145,7 +145,6 @@ function TeamPage() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    user_id: user ? user.id : "",
                     importance: newImportance,
                 }),
             });
@@ -178,7 +177,12 @@ function TeamPage() {
     useEffect(() => {
         const fetchTeam = async () => {
             try {
-                const res = await fetch(`${URL}/api/teams/${teamId}`);
+                const res = await fetch(`${URL}/api/teams/${teamId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
                 const teamObj = await res.json();
                 if (teamObj && user && teamObj.user_id === user.id) {
                     setTeam(teamObj);

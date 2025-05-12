@@ -24,13 +24,14 @@ const Teams = () => {
     const [teams, setTeams] = useState<Team[]>([]);
     const [teamName, setTeamName] = useState<string>('');
 
-    const fetchTeams = async(userID: string) => {
+    const fetchTeams = async() => {
       try{
-        const response = await fetch(`${URL}/api/teams/user/${userID}`, {
+        const response = await fetch(`${URL}/api/teams/user/`, {
         method: 'GET',
         headers: {
         'Content-Type': 'application/json',
-        }
+        },
+        credentials: "include"
       })
       const data = await response.json();
       setTeams(data);
@@ -46,15 +47,15 @@ const Teams = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: "include",
         body: JSON.stringify({
-          user_id: user.id,
           team_name: teamName,
           season: year,
           division: division
         })
       });
       await response.json();
-      fetchTeams(user.id);
+      fetchTeams();
     }
   }
 
@@ -65,7 +66,7 @@ const Teams = () => {
                 method: 'DELETE'                
             })
             await response.json()
-            fetchTeams(user.id);
+            fetchTeams();
         } catch (e) {
             console.error(e)
         }
@@ -78,7 +79,7 @@ const Teams = () => {
 
   useEffect(() => {
     if (user) {
-      fetchTeams(user.id);
+      fetchTeams();
     } else {
       console.log("User error")
     }

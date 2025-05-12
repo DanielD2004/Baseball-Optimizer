@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { SignedIn, SignedOut, SignInButton, SignUpButton, useUser, useAuth } from '@clerk/clerk-react'
 import Teams from './pages/Teams.tsx'
@@ -13,6 +13,7 @@ const URL = import.meta.env.VITE_NGROK_URL
 function App() {
   const { getToken } = useAuth();
   const { user } = useUser()
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   
   const login = async() => {
     const token = await getToken({ template: "Test" });
@@ -30,6 +31,7 @@ function App() {
         credentials: 'include'
       });
       await response.json();
+      setIsLoggedIn(true)
       } catch (error) {
           console.error('Error fetching teams:', error);
       }
@@ -62,12 +64,14 @@ function App() {
 
       <SignedIn>
         <Header/>
-        <Routes>
+        {isLoggedIn &&
+          <Routes>
             <Route path="/" element={<Teams/>}/>
             <Route path='/teams/:teamId' element={<TeamPage/>}/>
             <Route path='/teams/:teamId/optimized' element={<OptimizedPage/>}/>
             <Route path='/me' element={<MePage/>}/>
-        </Routes>
+          </Routes>
+        }
       </SignedIn>
     </BrowserRouter>
 

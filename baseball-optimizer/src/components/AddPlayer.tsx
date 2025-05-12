@@ -5,7 +5,7 @@ import "./AddPlayer.css";
 import Select from "react-select";
 import PlayerRating from "./PlayerRating";
 import { TextField } from '@mui/material';
-import { useLocation } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 
 const URL = import.meta.env.VITE_NGROK_URL
 
@@ -13,13 +13,6 @@ type PositionOption = {
 	label: string;
   }
 
-interface Team {
-    team_id: string;
-    user_id: string;
-    team_name: string;
-    season: string;
-    division: string;
-}
 
 interface Player {
     player_name: string;
@@ -43,8 +36,7 @@ const AddPlayer = ({ updatePlayers, player, disabled, playing}: AddPlayerProps) 
 	const [rating, setRating] = useState<number>(player.skill);
 	const [selectedPositions, setSelectedPositions] = useState<{ [key: string]: PositionOption }>(player.positions);
 	const [gender, setGender] = useState<string>(player.gender);
-	const location = useLocation()
-    const team: Team = location.state;
+	const { teamId } = useParams<{ teamId: string }>(); 
 
 	const positionOptions: PositionOption[] = [
 		// maybe fix this one day
@@ -67,7 +59,7 @@ const AddPlayer = ({ updatePlayers, player, disabled, playing}: AddPlayerProps) 
 	const updatePlayer = async () => {
 		if (!player) return;
 		try {
-			const response = await fetch(`${URL}/api/teams/${team.team_id}/players/update`, {
+			const response = await fetch(`${URL}/api/teams/${teamId}/players/update`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -80,16 +72,13 @@ const AddPlayer = ({ updatePlayers, player, disabled, playing}: AddPlayerProps) 
 					gender: gender
 				})
 			})
-			
 			if (!response.ok) {
 				// HTTP error
 				console.error(`${response.status}`);
 				return;
 			}
-	
 			const res = await response.json();
 			console.log(res);
-			// console.log(test)
 			updatePlayers();
 		} catch (error) {
 			console.error(error);
@@ -97,7 +86,7 @@ const AddPlayer = ({ updatePlayers, player, disabled, playing}: AddPlayerProps) 
 	};
 
 	const AddPlayer = async() => {
-    		const response = await fetch(`${URL}/api/teams/${team.team_id}/players`, {
+    		const response = await fetch(`${URL}/api/teams/${teamId}/players`, {
     			method: 'POST',
     			headers: {
     			  'Content-Type': 'application/json',
