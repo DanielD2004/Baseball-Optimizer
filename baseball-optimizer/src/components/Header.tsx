@@ -26,8 +26,8 @@ function Header() {
   };
 
   return (
-    <div id="header" className='z-0 relative flex justify-between items-center'>
-      <div className='ml-10 mt-3 flex items-center gap-4'>
+    <div id="header" className='z-0 relative flex justify-between items-center -mb-13'>
+      <div className='ml-10 mt-7 flex items-center gap-4'>
         <button
           onClick={handleLogout}
           className="bg-red-400 text-white rounded-lg px-4 py-2 hover:bg-red-500 transition duration-200"

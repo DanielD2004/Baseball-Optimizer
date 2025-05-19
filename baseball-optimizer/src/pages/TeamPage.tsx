@@ -89,6 +89,7 @@ function TeamPage() {
         try {
             const response = await fetch(`${URL}/api/teams/${teamId}/players`, {
                 method: 'GET',
+                credentials: "include",
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -122,6 +123,7 @@ function TeamPage() {
         try {
             const response = await fetch(`${URL}/api/teams/${teamId}/importance`, {
                 method: 'GET',
+                credentials: "include",
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -141,6 +143,7 @@ function TeamPage() {
         try {
             const response = await fetch(`${URL}/api/teams/${teamId}/importance`, {
                 method: 'POST',
+                credentials: "include",
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -165,7 +168,8 @@ function TeamPage() {
     const deletePlayer = async (player: Player) => {
         try {
             const response = await fetch(`${URL}/api/teams/${player.player_id}/Player`, {
-                method: 'DELETE'                
+                method: 'DELETE',
+                credentials: "include"                
             })
             await response.json()
             fetchPlayers()
@@ -179,6 +183,7 @@ function TeamPage() {
             try {
                 const res = await fetch(`${URL}/api/teams/${teamId}`, {
                     method: 'GET',
+                    credentials: "include",
                     headers: {
                         'Content-Type': 'application/json',
                     },

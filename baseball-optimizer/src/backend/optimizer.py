@@ -2,6 +2,7 @@ import json
 import os
 import pulp as pl
 from flask_cors import CORS
+from datetime import datetime, timezone, timedelta
 from tabulate import tabulate
 from flask import Flask, request, jsonify, session, render_template, make_response
 import logging
@@ -30,10 +31,15 @@ clerk_sdk = Clerk(bearer_auth=os.getenv("CLERK_SECRET_KEY"))
 uri = os.getenv("MONGO_URI")
 client = MongoClient(uri, server_api=ServerApi('1'))
 db = client["Optimizer"]
+app.permanent_session_lifetime = timedelta(hours=2)
+
 
 try:
     client.admin.command('ping')
     print("Pinged your deployment. You successfully connected to MongoDB!")
+    db.Teams.create_index({"created_at": 1}, expireAfterSeconds=604800)
+    db.Players.create_index({"created_at": 1}, expireAfterSeconds=604800)
+    db.Position_Importance.create_index({"created_at": 1}, expireAfterSeconds=604800)
 except Exception as e:
     print(e)
 
@@ -342,9 +348,130 @@ def get_authenticated_user(flask_request):
     return clerk_sdk.authenticate_request(
         req,
         AuthenticateRequestOptions(
-            authorized_parties=["http://localhost:5173"]  # Your frontend origin
+            authorized_parties=["http://localhost:5173"]
         )
     )
+
+def authorizeTeam(team_id):
+    team = db.Teams.find_one({"team_id": team_id})
+    if not team or team["user_id"] != session["user_id"]:
+        return None
+    return team
+
+def addTeam(user_id, data):
+    data["user_id"] = user_id
+    try:
+        result = db.Teams.update_one(
+            {
+                "user_id": user_id,
+                "team_name": data["team_name"],
+                "season": data["season"],
+                "division": data["division"]
+            },
+            {
+                "$set": data,
+                "$setOnInsert": {"team_id": str(ObjectId())}
+            },
+            upsert=True
+        )
+        return jsonify({"matched": result.matched_count, "modified": result.modified_count}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+    
+def addPlayer(player_data):
+    try:
+        result = db.Players.update_one(
+            {
+                "player_name": player_data["player_name"],
+                "skill": player_data["skill"],
+                "positions": player_data["positions"],
+                "team_id": player_data["team_id"],
+                "gender": player_data["gender"]
+            },
+            {
+                "$set": player_data,
+                "$setOnInsert": {"player_id": str(ObjectId())}
+            },
+            upsert=True
+        )
+        return jsonify({"matched": result.matched_count, "modified": result.modified_count}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+def setImportance(team_id, importance_data, created_at=None):
+    importanceObj = {
+        "team_id": team_id,
+        "importance": importance_data
+    }
+    if created_at:
+        importanceObj["created_at"] = created_at
+
+    try:
+        result = db.Position_Importance.update_one(
+            {"team_id": team_id},
+            {"$set": importanceObj},
+            upsert=True
+        )
+        return {"matched": result.matched_count, "modified": result.modified_count}
+    except Exception as e:
+        return {"error": str(e)}
+
+from datetime import timezone
+
+def createDemoTeam(user_id):
+    team_data = {
+        "team_name": "Demo Team",
+        "season": "2100",
+        "division": "Demo Division",
+        "created_at": datetime.now(timezone.utc)
+    }
+    result = addTeam(user_id, team_data)
+
+    if "error" in result:
+        return result
+
+    demo_team = db.Teams.find_one({"user_id": user_id, "team_name": "Demo Team"})
+    team_id = demo_team["team_id"]
+
+    for i in range(1, 13):
+        player_data = {
+            "team_id": team_id,
+            "player_name": f"Demo Player {i}",
+            "skill": 5,
+            "gender": "M" if i % 2 == 0 else "F",
+            "positions": {
+                "P": {"label": "Can Play"},
+                "C": {"label": "Can Play"},
+                "1B": {"label": "Wants to Play"},
+                "2B": {"label": "Can Play"},
+                "3B": {"label": "Can Play"},
+                "SS": {"label": "Can Play"},
+                "LF": {"label": "Can Play"},
+                "LC": {"label": "Can Play"},
+                "RC": {"label": "Can Play"},
+                "RF": {"label": "Can Play"}
+            },
+            "created_at": datetime.now(timezone.utc)
+        }
+        addPlayer(player_data)
+
+    importance = {
+        "P": 50,
+        "C": 50,
+        "1B": 50,
+        "2B": 50,
+        "3B": 50,
+        "SS": 50,
+        "LF": 50,
+        "LC": 50,
+        "RC": 50,
+        "RF": 50
+    }
+    setImportance(team_id, importance, created_at=datetime.now(timezone.utc))
+
+    return {"message": "Guest: demo team + players + importance created."}
+
 
 @app.route('/')
 def index():
@@ -355,7 +482,9 @@ def index():
 # Add a user
 @app.route("/api/users", methods=["POST"])
 def login():
+    session.clear()
     result = get_authenticated_user(request)
+    session.permanent = True
 
     if not result.is_signed_in:
         return jsonify({"error": "unauthorized"}), 401
@@ -380,10 +509,16 @@ def login():
         session["user_id"] = user_id
         session["guest_mode"] = email not in auth_users
 
-        if email not in auth_users:
-                return jsonify("User is in guest mode"), 200
-        
-        return jsonify({"matched": result.matched_count, "modified": result.modified_count}), 200
+        if session["guest_mode"]:
+            existing_team = db.Teams.find_one({"user_id": user_id})
+            if not existing_team:
+                result = createDemoTeam(user_id)
+                return jsonify(result), 200
+            else:
+                return jsonify({"message": "Guest: existing demo team found."}), 200
+
+        return jsonify({"message": "User logged in", "user_id": user_id}), 200
+
     except Exception as e:
         app.logger.info(e)
         return jsonify({"error": str(e)}), 500
@@ -406,70 +541,47 @@ def getTeams():
 # Get one team by team_id
 @app.route("/api/teams/<team_id>", methods=["GET"])
 def get_team_by_id(team_id):
-    if not team_id:
-        return jsonify({"error": "No team id"}), 400
-    try:
-        team = db.Teams.find_one({"team_id": team_id})
-        if not team:
-            return jsonify({"error": "Team not found"}), 404
-        team["_id"] = str(team["_id"])  # Make _id JSON serializable
-        return jsonify(team), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    if not session.get("user_id"):
+        return jsonify({"error": "Not logged in"}), 401
+    team = authorizeTeam(team_id)
+    if not team:
+        return jsonify({"error": "Not authorized"}), 403
+    
+    team["_id"] = str(team["_id"])
+    return jsonify(team), 200
 
 # Add a team
 @app.route("/api/teams", methods=["POST"])
-def addTeam():
+def addTeamEndpoint():
     user_id = session.get("user_id")
-    data = request.json
-    data["user_id"] = user_id
     if not user_id:
-        return jsonify({"error": "No user id"}), 400
-    try:
-        result = db.Teams.update_one(
-            {
-                "user_id": data["user_id"],
-                "team_name": data["team_name"],
-                "season": data["season"],
-                "division": data["division"]
-            },
-            {
-                "$set": data,
-                "$setOnInsert": {"team_id": str(ObjectId())}
-            },
-            upsert=True
-        )
-        return jsonify({"matched": result.matched_count, "modified": result.modified_count}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return {"error": "No user id"}
+    data = request.json
+    result = addTeam(user_id, data)
+    if "error" in result:
+        return jsonify({"error": result["error"]}), 400
+    return jsonify(result), 200
 
 #  Add a player to a team
 @app.route("/api/teams/<team_id>/players", methods=["POST"])
-def addPlayer(team_id):
+def addPlayerEndPoint(team_id):
+    if not session.get("user_id"):
+        return jsonify({"error": "Not logged in"}), 401
+    if not authorizeTeam(team_id):
+        return jsonify({"error": "Not authorized"}), 403
     data = request.json
-    data["team_id"] = team_id # add team_id to the player object
-    try:
-        result = db.Players.update_one(
-            {
-                "player_name": data["player_name"],
-                "skill": data["skill"],
-                "positions": data["positions"],
-                "team_id": team_id,
-                "gender": data["gender"]
-            },
-            {
-                "$set": data,
-                "$setOnInsert": {"player_id": str(ObjectId())}
-            },
-            upsert=True
-        )
-        return jsonify({"matched": result.matched_count, "modified": result.modified_count}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    data["team_id"] = team_id
+    return addPlayer(data)
 
 # Update a player for a team
 @app.route("/api/teams/<team_id>/players/update", methods=["POST"])
 def updatePlayer(team_id):
+    if not session.get("user_id"):
+        return jsonify({"error": "Not logged in"}), 401
+    
+    if not authorizeTeam(team_id):
+        return jsonify({"error": "Not authorized"}), 403
+    
     data = request.json
     try:
         result = db.Players.update_one(
@@ -494,6 +606,10 @@ def updatePlayer(team_id):
 # Get all players for a team
 @app.route("/api/teams/<team_id>/players", methods=["GET"])
 def getPlayers(team_id):
+    if not session.get("user_id"):
+        return jsonify({"error": "Not logged in"}), 401
+    if not authorizeTeam(team_id):
+        return jsonify({"error": "Not authorized"}), 403
     try:
         players = list(db.Players.find({"team_id": team_id}))
         for player in players:
@@ -504,22 +620,24 @@ def getPlayers(team_id):
 
 # Set importance for a team
 @app.route("/api/teams/<team_id>/importance", methods=["POST"])
-def setImportance(team_id):
+def setImportanceEndpoint(team_id):
+    if not session.get("user_id"):
+        return jsonify({"error": "Not logged in"}), 401
+    if not authorizeTeam(team_id):
+        return jsonify({"error": "Not authorized"}), 403
     data = request.json
-    data["team_id"] = team_id
-    try:
-        result = db.Position_Importance.update_one(
-            {"team_id": team_id},
-            {"$set": data},
-            upsert=True
-        )
-        return jsonify({"matched": result.matched_count, "modified": result.modified_count}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    result = setImportance(team_id, data)
+    if "error" in result:
+        return jsonify({"error": result["error"]}), 500
+    return jsonify(result), 200
 
 # Get importance for a team
 @app.route("/api/teams/<team_id>/importance", methods=["GET"])
 def getImportance(team_id):
+    if not session.get("user_id"):
+        return jsonify({"error": "Not logged in"}), 401
+    if not authorizeTeam(team_id):
+        return jsonify({"error": "Not authorized"}), 403
     try:
         result = db.Position_Importance.find_one({"team_id": team_id})
         if result:
@@ -530,6 +648,10 @@ def getImportance(team_id):
 
 @app.route("/api/teams/<team_id>/lineup", methods=["POST"])
 def optimize(team_id):
+    if not session.get("user_id"):
+        return jsonify({"error": "Not logged in"}), 401
+    if not authorizeTeam(team_id):
+        return jsonify({"error": "Not authorized"}), 403
     data = request.json
     try:
         result = optimize_softball_lineup(data)
@@ -538,17 +660,24 @@ def optimize(team_id):
     except Exception as e:
         return jsonify({
             "error": "Optimization failed",
-            "details": str(e)
+            "details": str(e) 
         }), 500
 
+# Delete team or player
 @app.route('/api/teams/<id>/<type>', methods=['DELETE'])
 def delete(id, type):
+    if not session.get("user_id"):
+        return jsonify({"error": "Not logged in"}), 401
+    
     try:
         if type == "Player":
-            result = db.Players.delete_one(
-                {"player_id": id}
-            )
+            player = db.Players.find_one({"player_id": id})
+            if not player or not authorizeTeam(player["team_id"]):
+                return jsonify({"error": "Not authorized"}), 403
+            db.Players.delete_one({"player_id": id})
         elif type == "Team":
+            if not authorizeTeam(id):
+                return jsonify({"error": "Not authorized"}), 403
             result = db.Teams.delete_one(
                 {"team_id": id}
             )
@@ -564,11 +693,15 @@ def ping():
 def me():
     app.logger.debug(f"Session contents: {dict(session)}")
     user_id = session.get("user_id")
-    guest = session.get("guest_mode")
+    guest_mode = session.get("guest_mode")
     if not user_id:
-        return jsonify({"error": "Not logged in"}), 4014
+        return jsonify({"error": "Not logged in"}), 401
 
-    return f"<h1>{user_id}</h1><br/><h1>{guest}</h1>"
+    data = {
+        "user_id": user_id,
+        "guest_mode": guest_mode
+    }
+    return data
 
 @app.route("/api/logout", methods=["POST"])
 def logout():
@@ -578,3 +711,4 @@ def logout():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
+

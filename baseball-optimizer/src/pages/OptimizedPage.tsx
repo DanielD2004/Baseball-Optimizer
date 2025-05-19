@@ -110,9 +110,9 @@ function OptimizedPage() {
 
     const getLineup = async () => {
         try {
-            sessionStorage.removeItem("rowOrder");
             const response = await fetch(`${URL}/api/teams/${team.team_id}/lineup`, {
                 method: 'POST',
+                credentials: "include",
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ players, importance }),
             });
@@ -121,14 +121,7 @@ function OptimizedPage() {
             const processedData = getPlayerPositionsByInning(data)
             setResult(processedData);
             setLoading(false);
-            const sessionRowOrder = sessionStorage.getItem("rowOrder");
-            if (sessionRowOrder){
-                setRowOrder(JSON.parse(sessionRowOrder))
-            }
-            else{
-                setRowOrder(Object.keys(processedData))
-                sessionStorage.setItem("rowOrder", JSON.stringify(Object.keys(processedData)))
-            }
+            setRowOrder(Object.keys(processedData))
         } catch (err) {
             console.error(err);
             setResult(null);
@@ -181,7 +174,6 @@ function OptimizedPage() {
                 const temp = newOrder[index]
                 newOrder[index] = newOrder[newIndex]
                 newOrder[newIndex] = temp
-                sessionStorage.setItem("rowOrder", JSON.stringify(newOrder))
                 return newOrder
             }
         })

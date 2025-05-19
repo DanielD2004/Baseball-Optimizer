@@ -61,6 +61,7 @@ const AddPlayer = ({ updatePlayers, player, disabled, playing}: AddPlayerProps) 
 		try {
 			const response = await fetch(`${URL}/api/teams/${teamId}/players/update`, {
 				method: 'POST',
+				credentials: "include",
 				headers: {
 					'Content-Type': 'application/json',
 				},
@@ -88,6 +89,7 @@ const AddPlayer = ({ updatePlayers, player, disabled, playing}: AddPlayerProps) 
 	const AddPlayer = async() => {
     		const response = await fetch(`${URL}/api/teams/${teamId}/players`, {
     			method: 'POST',
+				credentials: "include",
     			headers: {
     			  'Content-Type': 'application/json',
     			},
