@@ -74,6 +74,7 @@ function OptimizedPage() {
             try {
                 const response = await fetch(`${URL}/api/teams/${team.team_id}/players`, {
                     method: 'GET',
+                    credentials: "include",
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -92,6 +93,7 @@ function OptimizedPage() {
         try {
             const response = await fetch(`${URL}/api/teams/${team.team_id}/importance`, {
                 method: 'GET',
+                credentials: "include",
                 headers: {
                     'Content-Type': 'application/json',
                 },
