@@ -24,13 +24,14 @@ const Teams = () => {
     const [teams, setTeams] = useState<Team[]>([]);
     const [teamName, setTeamName] = useState<string>('');
 
-    const fetchTeams = async(userID: string) => {
+    const fetchTeams = async() => {
       try{
-        const response = await fetch(`${URL}/api/teams/${userID}`, {
+        const response = await fetch(`${URL}/api/teams/user/`, {
         method: 'GET',
         headers: {
         'Content-Type': 'application/json',
-        }
+        },
+        credentials: "include"
       })
       const data = await response.json();
       setTeams(data);
@@ -46,15 +47,15 @@ const Teams = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: "include",
         body: JSON.stringify({
-          user_id: user.id,
           team_name: teamName,
           season: year,
           division: division
         })
       });
       await response.json();
-      fetchTeams(user.id);
+      fetchTeams();
     }
   }
 
@@ -62,10 +63,11 @@ const Teams = () => {
       if (user){
         try {
             const response = await fetch(`${URL}/api/teams/${team.team_id}/Team`, {
-                method: 'DELETE'                
+                method: 'DELETE', 
+                credentials:"include"               
             })
             await response.json()
-            fetchTeams(user.id);
+            fetchTeams();
         } catch (e) {
             console.error(e)
         }
@@ -78,7 +80,7 @@ const Teams = () => {
 
   useEffect(() => {
     if (user) {
-      fetchTeams(user.id);
+      fetchTeams();
     } else {
       console.log("User error")
     }
@@ -86,7 +88,7 @@ const Teams = () => {
 
   return (
     <div id="teams" className='select-none'>
-      <h1 id="my-teams-header" className="select-none dark:text-white -mt-15 mb-1 text-slate-600 uppercase text-7xl font-bold font-mono text-center tracking-wide text-shadow-slate-300 text-shadow-lg dark:text-shadow-2xl dark:text-shadow-black">My Teams</h1>
+      <h1 id="my-teams-header" className="select-none dark:text-white mb-1 text-slate-600 uppercase text-7xl font-bold font-mono text-center tracking-wide text-shadow-slate-300 text-shadow-lg dark:text-shadow-2xl dark:text-shadow-black">My Teams</h1>
       <hr className='border-1 mb-4'/>
       {teams.length > 0 ? (
           // y space between children
