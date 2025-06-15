@@ -26,7 +26,7 @@ app.config.update(
     SESSION_COOKIE_SECURE=True
 )
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
-CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
+CORS(app, origins=["http://localhost:5173", "https://baseball-optimizer.vercel.app"], supports_credentials=True)
 clerk_sdk = Clerk(bearer_auth=os.getenv("CLERK_SECRET_KEY"))
 uri = os.getenv("MONGO_URI")
 client = MongoClient(uri, server_api=ServerApi('1'))
@@ -348,7 +348,10 @@ def get_authenticated_user(flask_request):
     return clerk_sdk.authenticate_request(
         req,
         AuthenticateRequestOptions(
-            authorized_parties=["http://localhost:5173"]
+            authorized_parties=[
+                                "http://localhost:5173",
+                                "https://baseball-optimizer.vercel.app"
+                                ]
         )
     )
 
@@ -485,7 +488,6 @@ def login():
     session.clear()
     result = get_authenticated_user(request)
     session.permanent = True
-
     if not result.is_signed_in:
         return jsonify({"error": "unauthorized"}), 401
     

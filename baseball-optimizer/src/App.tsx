@@ -17,6 +17,7 @@ function App() {
   
   const login = async() => {
     const token = await getToken({ template: "Test" });
+
     if (!user){
       return;
     }
