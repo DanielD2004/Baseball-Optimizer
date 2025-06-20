@@ -6,12 +6,14 @@ import Header from './components/Header.tsx'
 import TeamPage from './pages/TeamPage.tsx'
 import OptimizedPage from './pages/OptimizedPage.tsx'
 import MePage from './pages/MePage.tsx'
+import { useGuest } from './useGuest.ts'
 import './App.css'
 
 const URL = import.meta.env.VITE_NGROK_URL
 
 function App() {
   const { getToken } = useAuth();
+  const { setGuestMode } = useGuest()
   const { user } = useUser()
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   
@@ -31,7 +33,8 @@ function App() {
         },
         credentials: 'include'
       });
-      await response.json();
+      const res = await response.json();
+      setGuestMode(res.guest_mode)
       setIsLoggedIn(true)
       } catch (error) {
           console.error('Error fetching teams:', error);

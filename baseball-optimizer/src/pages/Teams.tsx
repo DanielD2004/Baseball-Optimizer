@@ -4,6 +4,7 @@ import { TextField } from '@mui/material';
 import DivisionSelect from '../components/DivisionSelect';
 import DatePicker from '../components/DatePicker';
 import TeamCard from '../components/TeamCard';
+import { useGuest } from '../useGuest';
 
 const URL = import.meta.env.VITE_NGROK_URL
 
@@ -23,6 +24,7 @@ const Teams = () => {
     const [year, setYear] = useState<string | null>(null);
     const [teams, setTeams] = useState<Team[]>([]);
     const [teamName, setTeamName] = useState<string>('');
+    const { guestMode } = useGuest();
 
     const fetchTeams = async() => {
       try{
@@ -101,17 +103,27 @@ const Teams = () => {
           <p className="text-center text-gray-500 mt-6">No teams found for this user.</p>
         )}
 
-       {/* better to not have increase scale on hover, year select brings it out of hover */}
-       <div className="hover:bg-zinc-50 dark:bg-slate-800 py-3 transition-discrete duration-100 bg-white shadow-md shadow-slate-500 rounded-2xl flex relative justify-center items-center max-w-1/5 flex-wrap w-100 mx-auto mt-10 select-none space-y-15">
-        <h1 className='dark:text-amber-500 absolute top-0 left-5 font-[500] mt-3'>Add Team:</h1>
-        <div className='flex flex-col mt-8 mr-5 items-start mb-20'>
-          <TextField error={teamName.length === 0} className="font-[500] rounded-lg" size="small" onChange={handleNameChange} value={teamName} label="Team Name" variant="outlined"/>
-          <DatePicker setYear={setYear}/>
-        </div>
-        <DivisionSelect setDivision={setDivision}/>
+        {guestMode && 
+          <h1 className='font-bold text-xl capitalize mt-10 -mb-10'>Adding new teams is disabled. Not an authorized user </h1>
+        }
+       {/* better to not have increase scale on hover. Also year select brings it out of hover */}
+       <div className="relative w-full max-w-fit mx-auto">
+
+        {/* Overlay div that disables everything underneath */}
+        {guestMode && (
+          <div className="absolute inset-0 z-10 bg-rose-100 opacity-75 cursor-not-allowed rounded-2xl" />
+        )}
+        <div className={`hover:bg-zinc-50 dark:bg-slate-800 py-3 transition-discrete duration-100 bg-white shadow-md shadow-slate-500 rounded-2xl flex relative justify-center items-center flex-wrap w-100 mx-auto mt-10 select-none space-y-15 `}>
+          <h1 className='dark:text-amber-500 absolute top-0 left-5 font-[500] mt-3'>Add Team:</h1>
+          <div className='flex flex-col mt-8 mr-5 items-start mb-20'>
+            <TextField error={teamName.length === 0} className="font-[500] rounded-lg" size="small" onChange={handleNameChange} value={teamName} label="Team Name" variant="outlined"/>
+            <DatePicker setYear={setYear}/>
+          </div>
+          <DivisionSelect setDivision={setDivision}/>
           <div onClick={addTeam} className={`${!teamName || !division || !year ? "cursor-not-allowed bg-rose-400 opacity-50 " : "hover:bg-gray-200 cursor-pointer  bg-slate-100 "} shadow-gray-600 shadow-sm -mt-10 transition transition-duration-300 border-2 border-slate-400 rounded-lg p-2 w-fit h-10 flex justify-center items-center select-none`}>
             Add Team
           </div>
+        </div>
       </div>
     </div>
   );

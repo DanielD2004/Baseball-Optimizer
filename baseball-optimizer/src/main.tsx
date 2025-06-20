@@ -4,6 +4,7 @@ import React from 'react'
 import "@radix-ui/themes/styles.css";
 import { Theme } from '@radix-ui/themes'
 import App from './App.tsx'
+import { GuestProvider } from './GuestProvider.tsx'
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
@@ -16,7 +17,9 @@ createRoot(document.getElementById('root')!).render(
     <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
       <Theme>
         <div className="h-screen w-screen bg-cyan-50 dark:bg-neutral-700">
-          <App/>
+          <GuestProvider>
+            <App/>
+          </GuestProvider>
         </div>
       </Theme>
     </ClerkProvider>
