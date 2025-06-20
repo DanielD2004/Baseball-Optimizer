@@ -444,14 +444,14 @@ def createDemoTeam(user_id):
             "skill": 5,
             "gender": "M" if i % 2 == 0 else "F",
             "positions": {
-                "P": {"label": "Can Play"},
+                "P": {"label": "Wants to Play"},
                 "C": {"label": "Can Play"},
                 "1B": {"label": "Wants to Play"},
                 "2B": {"label": "Can Play"},
-                "3B": {"label": "Can Play"},
+                "3B": {"label": "Wants to Play"},
                 "SS": {"label": "Can Play"},
                 "LF": {"label": "Can Play"},
-                "LC": {"label": "Can Play"},
+                "LC": {"label": "Wants to Play"},
                 "RC": {"label": "Can Play"},
                 "RF": {"label": "Can Play"}
             },
@@ -515,9 +515,9 @@ def login():
             existing_team = db.Teams.find_one({"user_id": user_id})
             if not existing_team:
                 result = createDemoTeam(user_id)
-                return jsonify(result), 200
+                return jsonify({"result": result, "guest_mode": True}), 200
             else:
-                return jsonify({"message": "Guest: existing demo team found."}), 200
+                return jsonify({"message": "Guest: existing demo team found.", "guest_mode": True}), 200
 
         return jsonify({"message": "User logged in", "user_id": user_id}), 200
 
@@ -555,6 +555,8 @@ def get_team_by_id(team_id):
 # Add a team
 @app.route("/api/teams", methods=["POST"])
 def addTeamEndpoint():
+    if session.get("guest_mode"):
+        return jsonify({"error": "Not Authorized"}), 401
     user_id = session.get("user_id")
     if not user_id:
         return {"error": "No user id"}
@@ -571,6 +573,9 @@ def addPlayerEndPoint(team_id):
         return jsonify({"error": "Not logged in"}), 401
     if not authorizeTeam(team_id):
         return jsonify({"error": "Not authorized"}), 403
+    count = db.players.count_documents({"team_id": team_id})
+    if count >= 15:
+        return jsonify({"error": "Team already at capacity"})
     data = request.json
     data["team_id"] = team_id
     return addPlayer(data)
@@ -680,10 +685,11 @@ def delete(id, type):
         elif type == "Team":
             if not authorizeTeam(id):
                 return jsonify({"error": "Not authorized"}), 403
-            result = db.Teams.delete_one(
+            db.Teams.delete_one(
                 {"team_id": id}
             )
-        return jsonify("Player Deleted"), 200
+            db.Players.delete_many({"team_id": id})
+        return jsonify("Deleted"), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

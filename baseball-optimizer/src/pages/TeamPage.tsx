@@ -6,6 +6,7 @@ import ImportanceModal from '../components/ImportanceModal';
 import { Switch } from "radix-ui";
 import "./TeamPage.css"
 import { TrashIcon } from '@radix-ui/react-icons';
+import { useGuest } from '../useGuest';
 
 const URL = import.meta.env.VITE_NGROK_URL
 
@@ -51,6 +52,7 @@ function TeamPage() {
     const { user } = useUser();
     const navigate = useNavigate();
     const { teamId } = useParams<{ teamId: string }>(); 
+    const { guestMode } = useGuest();
 
     const [importance, setImportance] = useState<Importance>({
         "1B": 50,
@@ -222,32 +224,45 @@ function TeamPage() {
             {team ? (
                 <>
                     <div className="-mt-15">
-                        <p className=" mx-auto w-fit cursor-pointer dark:text-white mb-1 text-slate-600 uppercase text-4xl md:text-7xl font-bold font-mono text-center tracking-wide text-shadow-slate-300 text-shadow-lg dark:text-shadow-2xl dark:text-shadow-black">
+                        <p className="mx-auto w-fit cursor-pointer dark:text-white mb-1 text-slate-600 uppercase text-4xl md:text-7xl font-bold font-mono text-center tracking-wide text-shadow-slate-300 text-shadow-lg dark:text-shadow-2xl dark:text-shadow-black mt-2">
                             {team.team_name} 
                         </p> 
                     </div>
                     <hr className='border-1 mb-4'/>
+                    {guestMode && <><h1 className='font-bold text-xl capitalize mb-5 -mb-10'> Guest Mode: Many Features Not Authorized </h1><h1 className='font-bold text-xl capitalize mb-5 -mb-10'> Unable to add players and edit all players or positional importance </h1></>}
                     {players.length > 0 ? (
                         <div className="col-span-full flex flex-wrap justify-center gap-4 w-2/3 mx-auto my-auto">
-                            {players.map((player) => (
-                                <div className={`${isPlaying[player.player_name] ? "bg-zinc-100" : "text-white bg-zinc-500 opacity-[.45]"} dark:bg-slate-800 hover:scale-105 transition-discrete duration-300  px-5 h-fit shadow-md shadow-slate-500 rounded-2xl py-5`} key={player.player_name} >
-                                    <div className='items-center justify-around flex flex-row gap-2 mb-3'>
-                                        <AddPlayer playing={isPlaying[player.player_name]} updatePlayers={fetchPlayers} player={player} />
-                                        <div onClick={() => {deletePlayer(player)}} className='cursor-pointer w-fit rounded-xl bg-gray-300 hover:bg-gray-200 hover:border-gray-500 border-gray-800 border-1 py-2'><TrashIcon className='w-fit h-7'/></div>
-                                    </div>
-                                    <div className='flex flex-row gap-3 my-2'>
-                                        <h2>Playing</h2>
-                                        <Switch.Root onCheckedChange={() => handlePlayingChange(player.player_name)} defaultChecked={isPlaying[player.player_name]} className="SwitchRootTeam">
-                                            <Switch.Thumb className="SwitchThumbTeam" />
-                                        </Switch.Root>
-                                    </div>
-                                    {player.positions && Object.entries(player.positions).map(([position, data]) => (
-                                        <div key={position}>
-                                            <strong>{position}:</strong> {data.label}
+                            {players.map((player, index) => {
+                                const locked = index > 2
+                                return(
+                                <> 
+                                    <div className="relative mx-auto">
+
+                                    {/* Overlay div that disables everything underneath */}
+                                        {guestMode && locked && (
+                                        <div className="absolute inset-0 bg-rose-100 opacity-75 cursor-not-allowed rounded-2xl" />
+                                        )}
+                                        <div className={`${isPlaying[player.player_name] ? "bg-zinc-100" : "text-white bg-zinc-500 opacity-[.45]"} max-w-50 dark:bg-slate-800 hover:scale-105 transition-discrete duration-300 px-5 h-fit shadow-md shadow-slate-500 rounded-2xl py-5`} key={player.player_name} >
+                                        
+                                            <div className='items-center justify-around flex flex-row gap-2 mb-3'>
+                                                <AddPlayer playing={isPlaying[player.player_name]} updatePlayers={fetchPlayers} player={player} />
+                                                <div onClick={() => {deletePlayer(player)}} className='cursor-pointer w-fit rounded-xl bg-gray-300 hover:bg-gray-200 hover:border-gray-500 border-gray-800 border-1 py-2'><TrashIcon className='w-fit h-7'/></div>
+                                            </div>
+                                            <div className='flex flex-row gap-3 my-2 ml-5'>
+                                                <h2>Playing</h2>
+                                                <Switch.Root onCheckedChange={() => handlePlayingChange(player.player_name)} defaultChecked={isPlaying[player.player_name]} className="SwitchRootTeam">
+                                                    <Switch.Thumb className="SwitchThumbTeam" />
+                                                </Switch.Root>
+                                            </div>
+                                            {player.positions && Object.entries(player.positions).map(([position, data]) => (
+                                                <div key={position}>
+                                                    <strong>{position}:</strong> {data.label}
+                                                </div>
+                                            ))}
                                         </div>
-                                    ))}
-                                </div>
-                            ))}
+                                    </div>
+                                </>
+                            )})}
                         </div>
                     ) :  
                     <div className='font-mono font-black text-5xl mt-70'>No Players On This Team Yet</div>
@@ -259,14 +274,14 @@ function TeamPage() {
             )}
             <div className='sticky flex flex-col gap-4 items-center pb-20 md:flex-row md:justify-center'>
                 {defaultPlayer && (
-                    <AddPlayer playing={true} disabled={players.length >= 15} key={players.length} updatePlayers={fetchPlayers} player={defaultPlayer}/>
+                    <AddPlayer playing={true} disabled={players.length >= 15 || guestMode} key={players.length} updatePlayers={fetchPlayers} player={defaultPlayer}/>
                 )}
                 <Link to={`/teams/${teamId}/optimized`} state={{team, isPlaying}}>
                     <div className="w-3xs bg-violet-300 border-2 rounded-md justify-center px-2 py-1 inline-flex h-20 select-none cursor-pointer items-center hover:bg-violet-300 transition duration-300">
                         Generate Lineup
                     </div>
                 </Link>
-                <ImportanceModal updateImportance={updateImportance} initialImportance={importance} />
+                {!guestMode && <ImportanceModal updateImportance={updateImportance} initialImportance={importance} />}
             </div>
         </div>
     );

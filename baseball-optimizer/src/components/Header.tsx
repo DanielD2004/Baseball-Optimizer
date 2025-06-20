@@ -27,17 +27,16 @@ function Header() {
 
   return (
     <div id="header" className='z-0 relative flex justify-between items-center -mb-13'>
-      <div className='ml-10 mt-7 flex items-center gap-4'>
+      <div className='bg-gray-300 hover:bg-gray-400 ml-10 mt-5 flex items-center gap-4 h-7 p-2 transition duration-200 rounded-lg border-1 cursor-pointer'>
         <button
           onClick={handleLogout}
-          className="bg-red-400 text-white rounded-lg px-4 py-2 hover:bg-red-500 transition duration-200"
         >
           Logout
         </button>
       </div>
 
       {pathname !== '/' && 
-        <div onClick={() => navigate(-1)} className="right-0 top-0 border-2 md:mr-15 border-slate-400 bg-slate-100 hover:bg-gray-200 rounded-lg w-fit h-fit px-1 flex justify-center items-center cursor-pointer select-none text-lg">
+        <div onClick={() => navigate(-1)} className="h-7 mt-5 right-0 top-0 border-2 md:mr-15 border-slate-400 bg-slate-100 hover:bg-gray-200 rounded-lg w-fitpx-1 flex justify-center items-center cursor-pointer select-none text-lg p-2">
           Back
         </div>
       }
