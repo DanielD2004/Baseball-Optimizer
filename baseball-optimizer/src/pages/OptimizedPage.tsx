@@ -118,7 +118,6 @@ function OptimizedPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ players, importance }),
             });
-    
             const data = await response.json();
             const processedData = getPlayerPositionsByInning(data)
             setResult(processedData);

@@ -215,6 +215,7 @@ function TeamPage() {
         };
 
         if (user && teamId) {
+            updateImportance(importance);
             fetchAll();
         }
     }, [user, teamId]);
@@ -235,14 +236,13 @@ function TeamPage() {
                             {players.map((player, index) => {
                                 const locked = index > 2
                                 return(
-                                <> 
-                                    <div className="relative mx-auto">
+                                    <div key={player.player_id} className="relative mx-auto">
 
                                     {/* Overlay div that disables everything underneath */}
                                         {guestMode && locked && (
-                                        <div className="absolute inset-0 bg-rose-100 opacity-75 cursor-not-allowed rounded-2xl" />
+                                        <div className="absolute inset-0 cursor-not-allowed rounded-2xl z-10"/>
                                         )}
-                                        <div className={`${isPlaying[player.player_name] ? "bg-zinc-100" : "text-white bg-zinc-500 opacity-[.45]"} max-w-50 dark:bg-slate-800 hover:scale-105 transition-discrete duration-300 px-5 h-fit shadow-md shadow-slate-500 rounded-2xl py-5`} key={player.player_name} >
+                                        <div className={`${locked && guestMode ? "opacity-55" : ""} ${isPlaying[player.player_name] ? "bg-zinc-100" : "text-white bg-zinc-500 opacity-[.45]"} max-w-50 dark:bg-slate-800 hover:scale-105 transition-discrete duration-300 px-5 shadow-md shadow-slate-500 rounded-2xl py-5`} key={player.player_name} >
                                         
                                             <div className='items-center justify-around flex flex-row gap-2 mb-3'>
                                                 <AddPlayer playing={isPlaying[player.player_name]} updatePlayers={fetchPlayers} player={player} />
@@ -261,7 +261,6 @@ function TeamPage() {
                                             ))}
                                         </div>
                                     </div>
-                                </>
                             )})}
                         </div>
                     ) :  
@@ -272,16 +271,16 @@ function TeamPage() {
             ) : (
                 <h2>No data</h2>
             )}
-            <div className='sticky flex flex-col gap-4 items-center pb-20 md:flex-row md:justify-center'>
+             <div className='sticky flex flex-col gap-4 items-center pb-20 md:flex-row md:justify-center'>
                 {defaultPlayer && (
                     <AddPlayer playing={true} disabled={players.length >= 15 || guestMode} key={players.length} updatePlayers={fetchPlayers} player={defaultPlayer}/>
                 )}
-                <Link to={`/teams/${teamId}/optimized`} state={{team, isPlaying}}>
-                    <div className="w-3xs bg-violet-300 border-2 rounded-md justify-center px-2 py-1 inline-flex h-20 select-none cursor-pointer items-center hover:bg-violet-300 transition duration-300">
-                        Generate Lineup
-                    </div>
+                <Link className={`${players.length < 10 ? "pointer-events-none" : ""}`} to={`/teams/${teamId}/optimized`} state={{team, isPlaying}}>
+                    {<div className={`${players.length < 10 ? "bg-gray-400 text-gray-600 text-white border-black" : "bg-violet-300"} w-3xs border-2 rounded-md justify-center px-2 py-1 inline-flex h-20 select-none cursor-pointer items-center hover:bg-violet-300 transition duration-300`}>
+                        {players.length < 10 ? "10 Players Needed To Create A Lineup" : "Generate Lineup"}
+                    </div>}
                 </Link>
-                {!guestMode && <ImportanceModal updateImportance={updateImportance} initialImportance={importance} />}
+                {<ImportanceModal disabled={guestMode} updateImportance={updateImportance} initialImportance={importance} />}
             </div>
         </div>
     );
