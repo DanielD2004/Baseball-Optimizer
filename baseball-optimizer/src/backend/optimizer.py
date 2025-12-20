@@ -127,6 +127,7 @@ def optimize_softball_lineup(team_data):
                 if preference == "wants to play":
                     coef = 100 * .3 + (((skill * 20) * (pos_importance)/100) * .7)  # Strong preference - heavily reward
                 elif preference == "can play":
+                    # These are very similar, solver basically checks if the skill of the can play player is worth more than 15 points (Overriding the wants to play)
                     coef = 50 * .3 + (((skill * 20) * (pos_importance)/100) * .7)  # Moderate preference - moderately reward
                 elif preference == "cannot play":
                     coef = -1000  # Strong negative - heavily penalize (will also be enforced by constraint)
@@ -189,7 +190,7 @@ def optimize_softball_lineup(team_data):
     for p in players:
         # First inning cumulative sits equals whether they sit in inning 1
         prob += (cumulative_sits[(p["id"], 1)] == sit[(p["id"], 1)], 
-                f"Cumulative_Sits_Init_{p['id']}")
+                f"Cumulative_Sits_Init_{p['id']}")     
         
         # For subsequent innings, cumulative sits = previous cumulative + current sit
         for i in range(2, num_innings + 1):
@@ -555,16 +556,17 @@ def get_team_by_id(team_id):
 # Add a team
 @app.route("/api/teams", methods=["POST"])
 def addTeamEndpoint():
+    app.logger.debug("here")
     if session.get("guest_mode"):
         return jsonify({"error": "Not Authorized"}), 401
     user_id = session.get("user_id")
     if not user_id:
         return {"error": "No user id"}
-    data = request.json
+    data = request.json 
     result = addTeam(user_id, data)
     if "error" in result:
         return jsonify({"error": result["error"]}), 400
-    return jsonify(result), 200
+    return result
 
 #  Add a player to a team
 @app.route("/api/teams/<team_id>/players", methods=["POST"])
@@ -652,7 +654,8 @@ def getImportance(team_id):
         return jsonify(result), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
+ 
+# Call the optimization function
 @app.route("/api/teams/<team_id>/lineup", methods=["POST"])
 def optimize(team_id):
     if not session.get("user_id"):
@@ -660,6 +663,8 @@ def optimize(team_id):
     if not authorizeTeam(team_id):
         return jsonify({"error": "Not authorized"}), 403
     data = request.json
+    if len(data["players"]) < 10:
+        return jsonify({"error": "Team Must Have 10 to 15 Players"}), 400
     try:
         result = optimize_softball_lineup(data)
         return jsonify(result), 200

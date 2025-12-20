@@ -20,9 +20,10 @@ interface Importance {
 interface ImportanceModalProps {
     updateImportance: (newImportance: Importance) => void;
     initialImportance: Importance;
+    disabled: boolean;
 }
 
-const ImportanceModal = ({ updateImportance, initialImportance }: ImportanceModalProps) => {
+const ImportanceModal = ({ updateImportance, initialImportance, disabled }: ImportanceModalProps) => {
     const [importance, setImportance] = useState<Importance>(initialImportance);
 
     const handleValueChange = (position: string, value: number) => {
@@ -39,11 +40,11 @@ const ImportanceModal = ({ updateImportance, initialImportance }: ImportanceModa
     useEffect(() => {
         setImportance(initialImportance); 
     }, [initialImportance]);
-
+       
     return (
         <Dialog.Root>
             <Dialog.Trigger asChild>
-                <div onClick={()=> setImportance(initialImportance)} className="w-3xs bg-violet-200 border-2 rounded-md justify-center px-2 py-1 inline-flex h-20 select-none cursor-pointer items-center hover:bg-violet-300 transition duration-300">Edit Position Importance</div>
+                <div onClick={()=> setImportance(initialImportance)} className={` ${disabled ? 'bg-gray-400 text-gray-600 pointer-events-none opacity-75 text-white border-black' : " bg-violet-200 cursor-pointer" } w-3xs border-2 rounded-md justify-center px-2 py-1 inline-flex h-20 select-none items-center hover:bg-violet-300 transition duration-300`}>Edit Position Importance</div>
             </Dialog.Trigger>
             <Dialog.Portal>
                 <Dialog.Overlay className="DialogOverlay" />
